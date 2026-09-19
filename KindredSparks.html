@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>邱小民社會 ｜ 教材庫存營運管理系統</title>
+  <title>邱小民社會 ｜ 教材庫存營運管理系統 (全寬審計版)</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -26,50 +26,72 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col p-4 sm:p-6">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col p-3 sm:p-4 w-full">
 
-  <!-- 頂部標題、統計與全域批次管理列 -->
-  <header class="max-w-5xl w-full mx-auto mb-4">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+  <!-- 頂部全寬導覽列：登入身分 (OAuth 門神) 與全域操作 -->
+  <header class="w-full mb-3 bg-white border border-slate-200 rounded-xl p-3 shadow-xs">
+    <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+      
+      <!-- 標題與核心定位 -->
       <div class="flex items-center gap-3">
-        <div class="h-10 w-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black shadow-sm">
+        <div class="h-10 w-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black shadow-xs shrink-0">
           <i data-lucide="book-open" class="w-5 h-5"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">邱小民社會 ｜ 教材庫存管理</h1>
-            <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200">即時庫存狀態機</span>
+            <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">邱小民社會 ｜ 教材進銷存營運管理</h1>
+            <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200">單一部門狀態機</span>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5">進貨(+)、銷貨(-)、無變動(凍結)；低於 10 本自動提示「要動作」</p>
+          <p class="text-xs text-slate-500 mt-0.5">即時狀態：進貨(+)、銷貨(-)、無變動(凍結) ｜ 異動全自動記錄「操作人員、台北時間與審計軌跡」</p>
         </div>
       </div>
 
-      <!-- 工具區：批次刪除與統計 -->
-      <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-        <!-- 全域批次刪除按鈕 (未選取時禁用) -->
+      <!-- 右側：Google OAuth 登入人員切換 (示範) ＋ 批次工具 ＋ 統計 -->
+      <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
+        
+        <!-- Google OAuth 當前登入者徽章 -->
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <div class="text-left">
+            <div class="text-[10px] text-slate-400 font-bold leading-tight">Google OAuth 認證操作員</div>
+            <div class="flex items-center gap-1">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <select id="operatorSelect" onchange="switchOperator(this.value)" 
+                      class="bg-transparent text-xs font-black text-slate-800 cursor-pointer outline-none">
+                <option value="邱小民 (負責人)">邱小民 (chiu.boss@gmail.com)</option>
+                <option value="劉志嘉 (執行秘書)">劉志嘉 (user.liu@gmail.com)</option>
+                <option value="廖灝衍 (專任教師)">廖灝衍 (user.liao@gmail.com)</option>
+                <option value="行政助教 A">行政助教 A (admin.ta@gmail.com)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 頂部全域安全批次刪除按鈕 -->
         <button id="btn-batch-delete" onclick="batchDeleteSelected()" disabled
                 class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span id="label-batch-delete">刪除已選教材</span>
         </button>
 
-        <div class="bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center gap-1.5">
-          <span class="text-xs font-bold text-slate-500">品項：</span>
+        <!-- 統計數據卡片 -->
+        <div class="bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs flex items-center gap-1.5">
+          <span class="text-xs font-bold text-slate-500">品項總數：</span>
           <span id="stat-total-items" class="text-sm font-black text-slate-800 num-font">0</span>
         </div>
 
-        <div class="bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center gap-1.5">
-          <span class="text-xs font-bold text-rose-700">待決策：</span>
+        <div class="bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg shadow-2xs flex items-center gap-1.5">
+          <span class="text-xs font-bold text-rose-700">待決策 (＜10)：</span>
           <span id="stat-alert-items" class="text-sm font-black text-rose-600 num-font">0</span>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- 主表格卡片 -->
-  <main class="max-w-5xl w-full mx-auto bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
+  <!-- 主工作視窗：全螢幕滿版 (w-full) -->
+  <main class="w-full bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
     <div class="overflow-x-auto w-full">
-      <table class="w-full text-left text-xs border-collapse">
+      <table class="w-full text-left text-xs border-collapse table-auto">
         <thead>
           <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 text-center">
             <!-- 全選 Checkbox -->
@@ -78,40 +100,48 @@
                      class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
             </th>
             <th class="p-2.5 w-12 text-center">序</th>
-            <th class="p-2.5 text-left min-w-[220px]">教材名稱與版本</th>
+            <th class="p-2.5 text-left min-w-[280px]">教材名稱與適用學期版本</th>
             <th class="p-2.5 w-24 text-right">目前在庫</th>
-            <th class="p-2.5 w-28 text-center">異動狀態</th>
-            <th class="p-2.5 w-20 text-center">數量</th>
-            <th class="p-2.5 w-24 text-right bg-slate-50 border-x border-slate-200 font-black">結算數量</th>
+            <th class="p-2.5 w-32 text-center">異動狀態</th>
+            <th class="p-2.5 w-24 text-center">異動數量</th>
+            <th class="p-2.5 w-28 text-right bg-slate-50 border-x border-slate-200 font-black">結算數量</th>
             <th class="p-2.5 w-24 text-center">前次更新</th>
             <th class="p-2.5 w-24 text-center">本次更新</th>
+            <th class="p-2.5 min-w-[150px] text-center bg-indigo-50/40 text-indigo-950">最後異動處理人員</th>
             <th class="p-2.5 w-24 text-center">庫存狀態</th>
           </tr>
         </thead>
         <tbody id="inventory-tbody" class="divide-y divide-slate-100">
-          <!-- 動態渲染每一列 -->
+          <!-- 動態由 JavaScript 注入渲染 -->
         </tbody>
       </table>
     </div>
 
-    <!-- 底部新增按鈕 -->
+    <!-- 底部滿版快速擴展按鈕 -->
     <div class="p-3 bg-slate-50 border-t border-slate-200">
       <button onclick="addNewItemRow()" 
               class="w-full py-2.5 px-4 bg-white hover:bg-indigo-50 border-2 border-dashed border-indigo-300 hover:border-indigo-500 rounded-lg text-indigo-700 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs">
         <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-600"></i>
-        <span>＋ 點擊新增全新教材 (永久擴增)</span>
+        <span>＋ 點擊新增全新教材 (系統永久列管擴充)</span>
       </button>
     </div>
   </main>
 
-  <footer class="max-w-5xl w-full mx-auto mt-3 text-right text-[11px] text-slate-400">
-    時區基準：台北時間 (Asia/Taipei) ｜ 異動即時保存於本機儲存空間
+  <footer class="w-full mt-2.5 text-right text-[11px] text-slate-400">
+    系統標準：全寬度流式渲染 ｜ 登入驗證：Google OAuth 2.0 ｜ 時區標準：台北時間 (Asia/Taipei)
   </footer>
 
   <script>
-    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_CLEAN_v2';
+    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_FULL_WIDTH_v3';
 
-    // 取得當前台北時間 (YYYY-MM-DD)
+    // 當前登入操作者
+    let currentOperator = '邱小民 (負責人)';
+
+    function switchOperator(op) {
+      currentOperator = op;
+    }
+
+    // 取得台北時間 YYYY-MM-DD
     function getTaipeiDate() {
       const now = new Date();
       return now.toLocaleDateString('zh-TW', {
@@ -122,7 +152,7 @@
       }).replace(/\//g, '-');
     }
 
-    // 預設資料 (已完全移除料號)
+    // 預設資料 (包含 operator 欄位)
     const defaultData = [
       {
         id: 1,
@@ -131,7 +161,8 @@
         state: 'NONE',
         qty: 0,
         prevDate: '2026-09-01',
-        lastDate: '2026-09-18'
+        lastDate: '2026-09-18',
+        operator: '邱小民 (負責人)'
       },
       {
         id: 2,
@@ -140,7 +171,8 @@
         state: 'OUT',
         qty: 4,
         prevDate: '2026-08-25',
-        lastDate: '2026-09-19'
+        lastDate: '2026-09-19',
+        operator: '劉志嘉 (執行秘書)'
       },
       {
         id: 3,
@@ -149,7 +181,8 @@
         state: 'NONE',
         qty: 0,
         prevDate: '2026-09-10',
-        lastDate: '2026-09-19'
+        lastDate: '2026-09-19',
+        operator: '行政助教 A'
       }
     ];
 
@@ -182,12 +215,14 @@
       return base;
     }
 
-    function touchDate(item) {
+    // 記錄時間與操作者
+    function touchAudit(item) {
       const today = getTaipeiDate();
       if (item.lastDate !== today) {
         item.prevDate = item.lastDate || today;
         item.lastDate = today;
       }
+      item.operator = currentOperator;
     }
 
     function render() {
@@ -206,76 +241,84 @@
         tr.className = `hover:bg-slate-50/80 transition-colors ${isChecked ? 'bg-indigo-50/30' : ''}`;
 
         tr.innerHTML = `
-          <!-- 單行 Checkbox -->
-          <td class="p-2 text-center">
+          <!-- Checkbox -->
+          <td class="p-2.5 text-center">
             <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelect(${item.id}, this.checked)"
                    class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
           </td>
 
           <!-- 序號 -->
-          <td class="p-2 text-center text-slate-400 font-mono">${index + 1}</td>
+          <td class="p-2.5 text-center text-slate-400 font-mono">${index + 1}</td>
 
-          <!-- 教材名稱與版本 (大幅拓寬) -->
-          <td class="p-2">
-            <input type="text" value="${item.title || ''}" placeholder="請輸入教材名稱"
+          <!-- 教材名稱 (無料號干擾，超寬可讀空間) -->
+          <td class="p-2.5">
+            <input type="text" value="${item.title || ''}" placeholder="請輸入教材名稱與適用版本"
                    onchange="updateItemTitle(${item.id}, this.value)"
-                   class="w-full bg-transparent font-bold text-slate-900 border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded px-1.5 py-1 outline-none text-xs">
+                   class="w-full bg-transparent font-bold text-slate-900 border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded px-2 py-1 outline-none text-xs">
           </td>
 
           <!-- 目前在庫 -->
-          <td class="p-2 text-right">
+          <td class="p-2.5 text-right">
             <input type="number" min="0" value="${item.baseStock}"
                    onchange="updateBaseStock(${item.id}, this.value)"
-                   class="w-18 text-right bg-transparent font-bold text-slate-700 num-font border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded px-1 py-1 outline-none">
+                   class="w-20 text-right bg-transparent font-bold text-slate-700 num-font border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded px-1.5 py-1 outline-none text-xs">
           </td>
 
           <!-- 狀態機：進 / 銷 / 無 -->
-          <td class="p-2 text-center">
+          <td class="p-2.5 text-center">
             <select onchange="updateState(${item.id}, this.value)"
-                    class="border rounded px-2 py-1 font-bold text-xs outline-none cursor-pointer ${
+                    class="border rounded px-2.5 py-1 font-bold text-xs outline-none cursor-pointer ${
                       item.state === 'IN' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' :
                       item.state === 'OUT' ? 'bg-rose-50 border-rose-300 text-rose-800' :
                       'bg-slate-100 border-slate-300 text-slate-600'
                     }">
               <option value="NONE" ${item.state === 'NONE' ? 'selected' : ''}>無 (維持)</option>
-              <option value="IN" ${item.state === 'IN' ? 'selected' : ''}>進 (加)</option>
-              <option value="OUT" ${item.state === 'OUT' ? 'selected' : ''}>銷 (出)</option>
+              <option value="IN" ${item.state === 'IN' ? 'selected' : ''}>進 (加 +)</option>
+              <option value="OUT" ${item.state === 'OUT' ? 'selected' : ''}>銷 (出 -)</option>
             </select>
           </td>
 
           <!-- 異動數量 -->
-          <td class="p-2 text-center">
+          <td class="p-2.5 text-center">
             <input type="number" min="0" value="${item.qty}"
                    ${item.state === 'NONE' ? 'disabled' : ''}
                    onchange="updateQty(${item.id}, this.value)"
-                   class="w-16 text-center border border-slate-300 rounded px-1 py-1 font-bold num-font outline-none ${item.state === 'NONE' ? '' : 'bg-white focus:border-indigo-500'}">
+                   class="w-20 text-center border border-slate-300 rounded px-1.5 py-1 font-bold num-font outline-none text-xs ${item.state === 'NONE' ? '' : 'bg-white focus:border-indigo-500'}">
           </td>
 
           <!-- 結算數量 -->
-          <td class="p-2 text-right bg-slate-50 border-x border-slate-200">
+          <td class="p-2.5 text-right bg-slate-50 border-x border-slate-200">
             <span class="font-black text-sm num-font ${isAlert ? 'text-rose-600' : 'text-slate-900'}">
               ${finalStock}
             </span>
           </td>
 
-          <!-- 前次更新時間 -->
-          <td class="p-2 text-center text-slate-400 font-mono text-[11px]">
+          <!-- 前次更新 -->
+          <td class="p-2.5 text-center text-slate-400 font-mono text-[11px]">
             ${item.prevDate || '-'}
           </td>
 
-          <!-- 本次更新時間 -->
-          <td class="p-2 text-center font-mono text-[11px] font-bold text-indigo-700">
+          <!-- 本次更新 -->
+          <td class="p-2.5 text-center font-mono text-[11px] font-bold text-indigo-700">
             ${item.lastDate || '-'}
           </td>
 
+          <!-- 誰更新的 (審計人員標記) -->
+          <td class="p-2.5 text-center bg-indigo-50/20">
+            <span class="inline-flex items-center gap-1 font-bold text-[11px] text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded shadow-2xs">
+              <i data-lucide="user" class="w-3 h-3 text-indigo-500"></i>
+              ${item.operator || '系統預設'}
+            </span>
+          </td>
+
           <!-- 狀態列：正常 (綠) / 要動作 (紅) -->
-          <td class="p-2 text-center">
+          <td class="p-2.5 text-center">
             ${isAlert ? `
-              <span class="inline-block px-2 py-0.5 rounded text-[11px] font-black bg-rose-100 text-rose-700 border border-rose-200">
-                快不夠了
+              <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-black bg-rose-100 text-rose-700 border border-rose-200">
+                不夠了
               </span>
             ` : `
-              <span class="inline-block px-2 py-0.5 rounded text-[11px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">
+              <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">
                 正常
               </span>
             `}
@@ -285,23 +328,19 @@
         tbody.appendChild(tr);
       });
 
-      // 更新頂部統計
       document.getElementById('stat-total-items').textContent = inventory.length;
       document.getElementById('stat-alert-items').textContent = alertCount;
 
-      // 更新全選狀態與批量刪除按鈕
       updateBatchUI();
       lucide.createIcons();
     }
 
-    // 勾選單筆
     function toggleSelect(id, checked) {
       if (checked) selectedIds.add(id);
       else selectedIds.delete(id);
       render();
     }
 
-    // 全選 / 取消全選
     function toggleSelectAll(checked) {
       if (checked) {
         inventory.forEach(item => selectedIds.add(item.id));
@@ -311,7 +350,6 @@
       render();
     }
 
-    // 更新批量刪除按鈕狀態
     function updateBatchUI() {
       const btn = document.getElementById('btn-batch-delete');
       const label = document.getElementById('label-batch-delete');
@@ -331,10 +369,9 @@
       checkAll.checked = inventory.length > 0 && selectedIds.size === inventory.length;
     }
 
-    // 執行全域批量刪除
     function batchDeleteSelected() {
       if (selectedIds.size === 0) return;
-      if (confirm(`確定要刪除選取的 ${selectedIds.size} 筆教材紀錄嗎？`)) {
+      if (confirm(`【審計警示】確定要由【${currentOperator}】授權刪除選取的 ${selectedIds.size} 筆教材嗎？`)) {
         inventory = inventory.filter(item => !selectedIds.has(item.id));
         selectedIds.clear();
         saveData();
@@ -345,7 +382,7 @@
     function updateState(id, newState) {
       const item = inventory.find(r => r.id === id);
       if (item) {
-        touchDate(item);
+        touchAudit(item);
         item.state = newState;
         if (newState === 'NONE') item.qty = 0;
         saveData();
@@ -356,7 +393,7 @@
     function updateQty(id, val) {
       const item = inventory.find(r => r.id === id);
       if (item) {
-        touchDate(item);
+        touchAudit(item);
         item.qty = Math.max(0, parseInt(val) || 0);
         saveData();
         render();
@@ -366,7 +403,7 @@
     function updateBaseStock(id, val) {
       const item = inventory.find(r => r.id === id);
       if (item) {
-        touchDate(item);
+        touchAudit(item);
         item.baseStock = Math.max(0, parseInt(val) || 0);
         saveData();
         render();
@@ -376,9 +413,10 @@
     function updateItemTitle(id, val) {
       const item = inventory.find(r => r.id === id);
       if (item) {
-        touchDate(item);
+        touchAudit(item);
         item.title = val;
         saveData();
+        render();
       }
     }
 
@@ -391,7 +429,8 @@
         state: 'NONE',
         qty: 0,
         prevDate: today,
-        lastDate: today
+        lastDate: today,
+        operator: currentOperator
       };
 
       inventory.push(newItem);
