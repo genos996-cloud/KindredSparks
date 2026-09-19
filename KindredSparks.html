@@ -42,7 +42,7 @@
 </head>
 <body class="bg-[#f5f5f7] text-[#1d1d1f] min-h-screen flex flex-col p-4 sm:p-6 w-full antialiased selection:bg-indigo-500 selection:text-white space-y-4">
 
-  <!-- 頂部 Apple 導覽列：操作員切換、重寄登記與狀態統計 -->
+  <!-- 頂部 Apple 導覽列：操作員切換、新增按鈕、唯一全域批次刪除與數據膠囊 -->
   <header class="w-full bg-white/80 apple-blur border border-slate-200/80 rounded-2xl px-5 py-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
     <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
       
@@ -59,7 +59,7 @@
         </p>
       </div>
 
-      <!-- 右側工具區：操作員選單、重寄登記按鈕、批次刪除與數據膠囊 -->
+      <!-- 右側工具區 -->
       <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
         
         <!-- 當前操作員選單 -->
@@ -76,16 +76,16 @@
           </select>
         </div>
 
-        <!-- 友善中性按鈕：登記重寄/補寄 -->
+        <!-- 登記重寄/補寄 -->
         <button onclick="addReshipRow()" 
                 class="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer shadow-xs active:scale-[0.98]">
           <i data-lucide="package-plus" class="w-3.5 h-3.5 text-indigo-600"></i>
           <span>＋ 登記教材重寄／補寄</span>
         </button>
 
-        <!-- 批次刪除常態教材按鈕 -->
+        <!-- 單一全域批次刪除按鈕 (唯一出口) -->
         <button id="btn-batch-delete" onclick="batchDeleteSelected()" disabled
-                class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed">
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span id="label-batch-delete">刪除已選</span>
         </button>
@@ -112,7 +112,7 @@
     </div>
   </header>
 
-  <!-- 區塊一：教材重寄／補寄回報專用區 (三格極簡填寫) -->
+  <!-- 區塊一：教材重寄／補寄報備專區 (三格極簡填寫，一致性 Checkbox) -->
   <section class="w-full bg-white/90 apple-blur border border-slate-200/80 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
     <div class="px-5 py-3 bg-slate-50/60 border-b border-slate-200/60 flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -129,6 +129,10 @@
       <table class="w-full text-left text-xs border-collapse table-auto">
         <thead>
           <tr class="bg-slate-50/40 text-slate-500 font-semibold border-b border-slate-200/60 text-center tracking-tight">
+            <th class="p-2.5 w-10 text-center">
+              <input type="checkbox" id="check-all-reship" onchange="toggleSelectAllReship(this.checked)"
+                     class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer">
+            </th>
             <th class="p-2.5 w-12 font-mono text-[11px] text-slate-400">#</th>
             <th class="p-2.5 w-28 text-center">報備日期</th>
             <!-- 格子 1：原因 -->
@@ -138,7 +142,6 @@
             <!-- 格子 3：數量 -->
             <th class="p-2.5 w-24 text-center">總本數</th>
             <th class="p-2.5 min-w-[150px] text-center">填表經手人</th>
-            <th class="p-2.5 w-16 text-center">操作</th>
           </tr>
         </thead>
         <tbody id="reship-tbody" class="divide-y divide-slate-100">
@@ -148,7 +151,7 @@
     </div>
   </section>
 
-  <!-- 區塊二：正規教材進銷存底冊 -->
+  <!-- 區塊二：常態教材進銷存底冊 (一致性 Checkbox，無行尾按鈕) -->
   <main class="w-full bg-white/90 apple-blur border border-slate-200/80 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col flex-1">
     <div class="px-5 py-3 bg-slate-50/50 border-b border-slate-200/60 flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -163,7 +166,7 @@
         <thead>
           <tr class="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/60 text-center tracking-tight">
             <th class="p-3 w-10 text-center">
-              <input type="checkbox" id="check-all" onchange="toggleSelectAll(this.checked)"
+              <input type="checkbox" id="check-all-inventory" onchange="toggleSelectAllInventory(this.checked)"
                      class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer">
             </th>
             <th class="p-3 w-12 text-center font-mono text-[11px] text-slate-400">#</th>
@@ -200,7 +203,7 @@
   </footer>
 
   <script>
-    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_HUMANE_v7';
+    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_CLEAN_BATCH_v8';
 
     let currentOperator = '邱小民 (負責人)';
 
@@ -251,7 +254,6 @@
           operator: '行政助教 A'
         }
       ],
-      // 重寄專用清單：格子 1: reason, 格子 2: content, 格子 3: books
       reshipLogs: [
         {
           id: 201,
@@ -265,7 +267,10 @@
     };
 
     let appData = JSON.parse(JSON.stringify(defaultData));
-    let selectedIds = new Set();
+    
+    // 兩張表各自選取的 ID 集合
+    let selectedInventoryIds = new Set();
+    let selectedReshipIds = new Set();
 
     function loadData() {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -305,10 +310,11 @@
       renderInventoryTable();
       renderReshipTable();
       updateHeaderStats();
+      updateBatchUI();
       lucide.createIcons();
     }
 
-    // 渲染常態庫存
+    // 渲染常態庫存表格
     function renderInventoryTable() {
       const tbody = document.getElementById('inventory-tbody');
       tbody.innerHTML = '';
@@ -316,14 +322,14 @@
       appData.inventory.forEach((item, index) => {
         const finalStock = calcFinalStock(item);
         const isAlert = finalStock < 10;
-        const isChecked = selectedIds.has(item.id);
+        const isChecked = selectedInventoryIds.has(item.id);
 
         const tr = document.createElement('tr');
         tr.className = `transition-colors duration-150 ${isChecked ? 'bg-indigo-50/40' : 'hover:bg-slate-50/60'}`;
 
         tr.innerHTML = `
           <td class="p-3 text-center">
-            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelect(${item.id}, this.checked)"
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectInventory(${item.id}, this.checked)"
                    class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer">
           </td>
           <td class="p-3 text-center text-slate-400 font-mono text-[11px]">${index + 1}</td>
@@ -381,11 +387,9 @@
         `;
         tbody.appendChild(tr);
       });
-
-      updateBatchUI();
     }
 
-    // 渲染重寄報備清冊 (三格輸入)
+    // 渲染重寄表格
     function renderReshipTable() {
       const tbody = document.getElementById('reship-tbody');
       tbody.innerHTML = '';
@@ -396,54 +400,120 @@
       }
 
       appData.reshipLogs.forEach((log, index) => {
+        const isChecked = selectedReshipIds.has(log.id);
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50/60 transition-colors duration-150';
+        tr.className = `transition-colors duration-150 ${isChecked ? 'bg-indigo-50/40' : 'hover:bg-slate-50/60'}`;
 
         tr.innerHTML = `
+          <td class="p-2.5 text-center">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectReship(${log.id}, this.checked)"
+                   class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer">
+          </td>
           <td class="p-2.5 text-center text-slate-400 font-mono text-[11px]">${index + 1}</td>
-          
-          <!-- 日期 -->
           <td class="p-2.5 text-center font-mono text-xs text-slate-600">
             <input type="date" value="${log.date}" onchange="updateReship(${log.id}, 'date', this.value)"
                    class="apple-input bg-transparent border border-transparent hover:border-slate-200 rounded px-1.5 py-0.5 text-xs text-center">
           </td>
-
-          <!-- 格子 1：重寄原因 -->
           <td class="p-2.5">
             <input type="text" value="${log.reason || ''}" placeholder="請簡述重寄或補寄原因"
                    onchange="updateReship(${log.id}, 'reason', this.value)"
                    class="apple-input w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-medium focus:border-indigo-500">
           </td>
-
-          <!-- 格子 2：教材商品內容 -->
           <td class="p-2.5">
-            <input type="text" value="${log.content || ''}" placeholder="請填寫補寄的教材內容 (例：國二社會講義1本)"
+            <input type="text" value="${log.content || ''}" placeholder="請填寫補寄的教材內容"
                    onchange="updateReship(${log.id}, 'content', this.value)"
                    class="apple-input w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-medium focus:border-indigo-500">
           </td>
-
-          <!-- 格子 3：數量 (本數) -->
           <td class="p-2.5 text-center">
             <input type="number" min="1" value="${log.books || 1}" onchange="updateReship(${log.id}, 'books', this.value)"
                    class="apple-input w-16 text-center bg-white border border-slate-200/80 rounded-lg px-1.5 py-1 text-xs font-bold text-indigo-700 num-font">
           </td>
-
-          <!-- 責任填寫人 -->
           <td class="p-2.5 text-center">
             <span class="inline-block font-medium text-[11px] text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
               ${log.operator}
             </span>
           </td>
-
-          <!-- 操作 -->
-          <td class="p-2.5 text-center">
-            <button onclick="deleteReshipRow(${log.id})" class="text-slate-400 hover:text-rose-600 p-1 rounded transition">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    // 勾選控制：常態庫存
+    function toggleSelectInventory(id, checked) {
+      if (checked) selectedInventoryIds.add(id);
+      else selectedInventoryIds.delete(id);
+      render();
+    }
+
+    function toggleSelectAllInventory(checked) {
+      if (checked) {
+        appData.inventory.forEach(item => selectedInventoryIds.add(item.id));
+      } else {
+        selectedInventoryIds.clear();
+      }
+      render();
+    }
+
+    // 勾選控制：重寄報備
+    function toggleSelectReship(id, checked) {
+      if (checked) selectedReshipIds.add(id);
+      else selectedReshipIds.delete(id);
+      render();
+    }
+
+    function toggleSelectAllReship(checked) {
+      if (checked) {
+        appData.reshipLogs.forEach(log => selectedReshipIds.add(log.id));
+      } else {
+        selectedReshipIds.clear();
+      }
+      render();
+    }
+
+    // 更新頂部批次刪除按鈕
+    function updateBatchUI() {
+      const btn = document.getElementById('btn-batch-delete');
+      const label = document.getElementById('label-batch-delete');
+      const totalSelected = selectedInventoryIds.size + selectedReshipIds.size;
+
+      if (totalSelected > 0) {
+        btn.disabled = false;
+        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-rose-200 bg-rose-500 hover:bg-rose-600 text-white cursor-pointer shadow-xs active:scale-[0.98]';
+        label.textContent = `刪除已選 (${totalSelected})`;
+      } else {
+        btn.disabled = true;
+        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed';
+        label.textContent = '刪除已選';
+      }
+
+      // 全選狀態同步
+      const checkInv = document.getElementById('check-all-inventory');
+      if (checkInv) {
+        checkInv.checked = appData.inventory.length > 0 && selectedInventoryIds.size === appData.inventory.length;
+      }
+      const checkReship = document.getElementById('check-all-reship');
+      if (checkReship) {
+        checkReship.checked = appData.reshipLogs.length > 0 && selectedReshipIds.size === appData.reshipLogs.length;
+      }
+    }
+
+    // 單一全域批次刪除
+    function batchDeleteSelected() {
+      const totalSelected = selectedInventoryIds.size + selectedReshipIds.size;
+      if (totalSelected === 0) return;
+
+      if (confirm(`確定要刪除所有已勾選的 ${totalSelected} 筆項目嗎？`)) {
+        if (selectedInventoryIds.size > 0) {
+          appData.inventory = appData.inventory.filter(item => !selectedInventoryIds.has(item.id));
+          selectedInventoryIds.clear();
+        }
+        if (selectedReshipIds.size > 0) {
+          appData.reshipLogs = appData.reshipLogs.filter(log => !selectedReshipIds.has(log.id));
+          selectedReshipIds.clear();
+        }
+        saveData();
+        render();
+      }
     }
 
     function updateHeaderStats() {
@@ -463,7 +533,6 @@
       document.getElementById('stat-reship-books').textContent = totalBooks;
     }
 
-    // 新增重寄登記 (三格填寫)
     function addReshipRow() {
       const today = getTaipeiDate();
       const newLog = {
@@ -474,7 +543,7 @@
         books: 1,
         operator: currentOperator
       };
-      appData.reshipLogs.unshift(newLog); // 放在第一列
+      appData.reshipLogs.unshift(newLog);
       saveData();
       render();
     }
@@ -487,59 +556,6 @@
         } else {
           log[field] = value;
         }
-        saveData();
-        render();
-      }
-    }
-
-    function deleteReshipRow(id) {
-      if (confirm('確定要移除此筆重寄備查紀錄嗎？')) {
-        appData.reshipLogs = appData.reshipLogs.filter(r => r.id !== id);
-        saveData();
-        render();
-      }
-    }
-
-    // 常態庫存操作
-    function toggleSelect(id, checked) {
-      if (checked) selectedIds.add(id);
-      else selectedIds.delete(id);
-      render();
-    }
-
-    function toggleSelectAll(checked) {
-      if (checked) {
-        appData.inventory.forEach(item => selectedIds.add(item.id));
-      } else {
-        selectedIds.clear();
-      }
-      render();
-    }
-
-    function updateBatchUI() {
-      const btn = document.getElementById('btn-batch-delete');
-      const label = document.getElementById('label-batch-delete');
-      const checkAll = document.getElementById('check-all');
-      const count = selectedIds.size;
-
-      if (count > 0) {
-        btn.disabled = false;
-        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all duration-200 border border-rose-200 bg-rose-500 hover:bg-rose-600 text-white cursor-pointer shadow-xs active:scale-[0.98]';
-        label.textContent = `刪除已選 (${count})`;
-      } else {
-        btn.disabled = true;
-        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed';
-        label.textContent = '刪除已選';
-      }
-
-      checkAll.checked = appData.inventory.length > 0 && selectedIds.size === appData.inventory.length;
-    }
-
-    function batchDeleteSelected() {
-      if (selectedIds.size === 0) return;
-      if (confirm(`確定要刪除選取的 ${selectedIds.size} 筆常態教材嗎？`)) {
-        appData.inventory = appData.inventory.filter(item => !selectedIds.has(item.id));
-        selectedIds.clear();
         saveData();
         render();
       }
