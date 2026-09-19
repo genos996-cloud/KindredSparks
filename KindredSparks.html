@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>邱小民社會 ｜ 教材庫存營運管理系統</title>
+  <title>邱小民社會 ｜ 教材庫存與損耗稽核系統</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,7 +19,6 @@
       font-feature-settings: "tnum";
       font-variant-numeric: tabular-nums;
     }
-    /* Apple 磨砂與細微過渡 */
     .apple-blur {
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -41,52 +40,60 @@
     }
   </style>
 </head>
-<body class="bg-[#f5f5f7] text-[#1d1d1f] min-h-screen flex flex-col p-4 sm:p-6 w-full antialiased selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#f5f5f7] text-[#1d1d1f] min-h-screen flex flex-col p-4 sm:p-6 w-full antialiased selection:bg-indigo-500 selection:text-white space-y-4">
 
-  <!-- 頂部 Apple 風格導覽列 (純文字無圖示、極簡磨砂) -->
-  <header class="w-full mb-4 bg-white/80 apple-blur border border-slate-200/80 rounded-2xl px-5 py-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+  <!-- 頂部 Apple 導覽列：操作者身分、事故登記按鈕與核心財務警示 -->
+  <header class="w-full bg-white/80 apple-blur border border-slate-200/80 rounded-2xl px-5 py-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
     <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
       
-      <!-- 品牌與系統名稱 (完全捨棄多餘圖示) -->
+      <!-- 品牌標題 -->
       <div>
         <div class="flex items-center gap-2.5">
           <h1 class="text-base sm:text-lg font-bold tracking-tight text-[#1d1d1f]">邱小民社會教學團隊</h1>
           <span class="text-[11px] font-semibold text-slate-500 tracking-wider uppercase px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200/60">
-            Inventory Core
+            Inventory & Loss Audit
           </span>
         </div>
         <p class="text-xs text-slate-400 mt-0.5 font-normal tracking-normal">
-          進銷存狀態機 ｜ Google OAuth 身分聯網稽核
+          正規進銷存帳目 ｜ 人為重複寄送損耗歸屬追蹤
         </p>
       </div>
 
-      <!-- 右側：身分識別、操作與全域統計卡片 -->
-      <div class="flex items-center gap-3 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
+      <!-- 右側工具區：操作者切換、新增損耗按鈕與數據統計 -->
+      <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
         
-        <!-- Google OAuth 操作者膠囊 -->
+        <!-- 當前操作員選單 -->
         <div class="flex items-center gap-2 bg-slate-100/70 border border-slate-200/60 pl-2.5 pr-3 py-1.5 rounded-xl text-xs">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span class="text-[11px] font-medium text-slate-400">操作員</span>
+          <span class="text-[11px] font-medium text-slate-400">登入者</span>
           <select id="operatorSelect" onchange="switchOperator(this.value)" 
                   class="bg-transparent font-semibold text-slate-800 cursor-pointer outline-none text-xs">
             <option value="邱小民 (負責人)">邱小民 (chiu.boss@gmail.com)</option>
             <option value="劉志嘉 (執行秘書)">劉志嘉 (user.liu@gmail.com)</option>
             <option value="廖灝衍 (專任教師)">廖灝衍 (user.liao@gmail.com)</option>
             <option value="行政助教 A">行政助教 A (admin.ta@gmail.com)</option>
+            <option value="行政工讀生">行政工讀生 (intern@gmail.com)</option>
           </select>
         </div>
 
-        <!-- 批次刪除按鈕 (未選取時禁用) -->
+        <!-- 專用按鈕：登記重複寄送事故 -->
+        <button onclick="addLossRow()" 
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-amber-300 bg-amber-500 hover:bg-amber-600 text-white cursor-pointer shadow-xs active:scale-[0.98]">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+          <span>＋ 登記重複寄送事故</span>
+        </button>
+
+        <!-- 批次刪除在庫按鈕 -->
         <button id="btn-batch-delete" onclick="batchDeleteSelected()" disabled
-                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed">
+                class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span id="label-batch-delete">刪除已選</span>
         </button>
 
-        <!-- 數據統計膠囊 -->
+        <!-- 統計數據膠囊 -->
         <div class="flex items-center gap-2">
           <div class="bg-slate-100/80 border border-slate-200/60 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-            <span class="text-xs text-slate-500 font-medium">總品項</span>
+            <span class="text-xs text-slate-500 font-medium">在庫品項</span>
             <span id="stat-total-items" class="text-xs font-bold text-slate-900 num-font">0</span>
           </div>
 
@@ -94,14 +101,61 @@
             <span class="text-xs text-rose-600 font-medium">待決策</span>
             <span id="stat-alert-items" class="text-xs font-bold text-rose-600 num-font">0</span>
           </div>
+
+          <!-- 全月重複寄送虧損累計 -->
+          <div class="bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+            <span class="text-xs text-amber-800 font-medium">重寄虧損</span>
+            <span id="stat-loss-amount" class="text-xs font-black text-rose-600 num-font">$ 0</span>
+          </div>
         </div>
 
       </div>
     </div>
   </header>
 
-  <!-- 主表格：全寬度滿版 Apple 玻璃工作台 -->
+  <!-- 區塊一：人為重複寄送 / 報廢事故責任清冊 (獨立表格) -->
+  <section class="w-full bg-white/90 apple-blur border border-amber-200/80 rounded-2xl shadow-[0_4px_24px_rgba(245,158,11,0.04)] overflow-hidden flex flex-col">
+    <div class="px-5 py-3 bg-amber-50/50 border-b border-amber-200/60 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+        <h2 class="text-xs font-bold text-amber-900 tracking-tight">人為重複寄送與包裝報廢事故稽核單</h2>
+        <span class="text-[10px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded-md">不可扣抵責任帳</span>
+      </div>
+      <div class="text-[11px] text-amber-800 font-medium">
+        累計事故損耗本數：<strong id="stat-loss-books" class="font-bold text-rose-600 num-font">0</strong> 本
+      </div>
+    </div>
+
+    <div class="overflow-x-auto w-full">
+      <table class="w-full text-left text-xs border-collapse table-auto">
+        <thead>
+          <tr class="bg-amber-50/30 text-amber-900/70 font-semibold border-b border-amber-100 text-center tracking-tight">
+            <th class="p-2.5 w-12 font-mono text-[11px]">#</th>
+            <th class="p-2.5 w-28 text-center">事故日期</th>
+            <th class="p-2.5 text-left min-w-[280px]">浪費教材內容與事故描述 (例：國二講義2本+歷屆試題1本)</th>
+            <th class="p-2.5 w-24 text-center">損耗本數</th>
+            <th class="p-2.5 w-28 text-right">預估虧損金額</th>
+            <th class="p-2.5 min-w-[150px] text-center">責任經手人</th>
+            <th class="p-2.5 w-16 text-center">操作</th>
+          </tr>
+        </thead>
+        <tbody id="loss-tbody" class="divide-y divide-amber-100/60">
+          <!-- 由 JavaScript 渲染 -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 區塊二：正規教材進銷存底冊 -->
   <main class="w-full bg-white/90 apple-blur border border-slate-200/80 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col flex-1">
+    <div class="px-5 py-3 bg-slate-50/50 border-b border-slate-200/60 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+        <h2 class="text-xs font-bold text-slate-800 tracking-tight">常態教材進銷存與庫存狀態機</h2>
+      </div>
+      <span class="text-[11px] text-slate-400">維持常態進銷運算，低於 10 本亮紅燈提示</span>
+    </div>
+
     <div class="overflow-x-auto w-full">
       <table class="w-full text-left text-xs border-collapse table-auto">
         <thead>
@@ -118,33 +172,33 @@
             <th class="p-3 w-28 text-right bg-slate-50/50 border-x border-slate-200/50 font-bold text-slate-800">結算數量</th>
             <th class="p-3 w-28 text-center text-slate-400">前次更新</th>
             <th class="p-3 w-28 text-center text-slate-400">本次更新</th>
-            <th class="p-3 min-w-[160px] text-center">最後經手人</th>
+            <th class="p-3 min-w-[150px] text-center">最後經手人</th>
             <th class="p-3 w-24 text-center">狀態判定</th>
           </tr>
         </thead>
         <tbody id="inventory-tbody" class="divide-y divide-slate-100/80">
-          <!-- 核心資料由 JavaScript 驅動渲染 -->
+          <!-- 渲染常態教材 -->
         </tbody>
       </table>
     </div>
 
-    <!-- 底部滿版快速擴展按鈕 -->
+    <!-- 底部新增品項按鈕 -->
     <div class="p-3 bg-slate-50/50 border-t border-slate-200/60">
       <button onclick="addNewItemRow()" 
               class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 active:scale-[0.998] border border-slate-200/80 hover:border-slate-300 rounded-xl text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
         <i data-lucide="plus" class="w-3.5 h-3.5 text-slate-500"></i>
-        <span>新增全新教材品項</span>
+        <span>新增常態教材品項</span>
       </button>
     </div>
   </main>
 
-  <footer class="w-full mt-3 px-1 flex justify-between items-center text-[11px] text-slate-400 tracking-tight">
+  <footer class="w-full px-1 flex justify-between items-center text-[11px] text-slate-400 tracking-tight">
     <span>時區基準：台北時間 (Asia/Taipei)</span>
-    <span>內部稽核日誌已啟用 ｜ 離線數據自動同步</span>
+    <span>事故記錄直接綁定當前登入者身分 ｜ 本地數據即時保存</span>
   </footer>
 
   <script>
-    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_APPLE_v4';
+    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_SEPARATE_LOSS_v6';
 
     let currentOperator = '邱小民 (負責人)';
 
@@ -162,63 +216,75 @@
       }).replace(/\//g, '-');
     }
 
-    const defaultData = [
-      {
-        id: 1,
-        title: '國一社會臺灣史核心焦點',
-        baseStock: 48,
-        state: 'NONE',
-        qty: 0,
-        prevDate: '2026-09-01',
-        lastDate: '2026-09-18',
-        operator: '邱小民 (負責人)'
-      },
-      {
-        id: 2,
-        title: '國二社會中國史歷屆全圖解',
-        baseStock: 12,
-        state: 'OUT',
-        qty: 4,
-        prevDate: '2026-08-25',
-        lastDate: '2026-09-19',
-        operator: '劉志嘉 (執行秘書)'
-      },
-      {
-        id: 3,
-        title: '國三會考全科社會黃金素養模考本',
-        baseStock: 9,
-        state: 'NONE',
-        qty: 0,
-        prevDate: '2026-09-10',
-        lastDate: '2026-09-19',
-        operator: '行政助教 A'
-      }
-    ];
+    // 預設資料：包含一般庫存與獨立損耗事故
+    const defaultData = {
+      inventory: [
+        {
+          id: 1,
+          title: '國一社會臺灣史核心焦點',
+          baseStock: 48,
+          state: 'NONE',
+          qty: 0,
+          prevDate: '2026-09-01',
+          lastDate: '2026-09-18',
+          operator: '邱小民 (負責人)'
+        },
+        {
+          id: 2,
+          title: '國二社會中國史歷屆全圖解',
+          baseStock: 12,
+          state: 'OUT',
+          qty: 4,
+          prevDate: '2026-08-25',
+          lastDate: '2026-09-19',
+          operator: '劉志嘉 (執行秘書)'
+        },
+        {
+          id: 3,
+          title: '國三會考全科社會黃金素養模考本',
+          baseStock: 9,
+          state: 'NONE',
+          qty: 0,
+          prevDate: '2026-09-10',
+          lastDate: '2026-09-19',
+          operator: '行政助教 A'
+        }
+      ],
+      lossLogs: [
+        {
+          id: 101,
+          date: '2026-09-18',
+          content: '重複寄送林同學：國三模考本 2 本＋歷屆詳解 1 本 (含運費損耗)',
+          books: 3,
+          cost: 1050,
+          operator: '行政工讀生'
+        }
+      ]
+    };
 
-    let inventory = [];
+    let appData = JSON.parse(JSON.stringify(defaultData));
     let selectedIds = new Set();
 
     function loadData() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
-          inventory = JSON.parse(saved);
+          appData = JSON.parse(saved);
         } catch (e) {
-          inventory = defaultData;
+          appData = defaultData;
         }
       } else {
-        inventory = defaultData;
+        appData = defaultData;
       }
     }
 
     function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     }
 
     function calcFinalStock(item) {
       const base = Number(item.baseStock) || 0;
       const q = Number(item.qty) || 0;
-
       if (item.state === 'IN') return base + q;
       if (item.state === 'OUT') return Math.max(0, base - q);
       return base;
@@ -233,46 +299,43 @@
       item.operator = currentOperator;
     }
 
+    // 渲染主畫面
     function render() {
+      renderInventoryTable();
+      renderLossTable();
+      updateHeaderStats();
+      lucide.createIcons();
+    }
+
+    // 渲染常態庫存
+    function renderInventoryTable() {
       const tbody = document.getElementById('inventory-tbody');
       tbody.innerHTML = '';
 
-      let alertCount = 0;
-
-      inventory.forEach((item, index) => {
+      appData.inventory.forEach((item, index) => {
         const finalStock = calcFinalStock(item);
         const isAlert = finalStock < 10;
-        if (isAlert) alertCount++;
-
         const isChecked = selectedIds.has(item.id);
+
         const tr = document.createElement('tr');
         tr.className = `transition-colors duration-150 ${isChecked ? 'bg-indigo-50/40' : 'hover:bg-slate-50/60'}`;
 
         tr.innerHTML = `
-          <!-- 勾選框 -->
           <td class="p-3 text-center">
             <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelect(${item.id}, this.checked)"
                    class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer">
           </td>
-
-          <!-- 序號 -->
           <td class="p-3 text-center text-slate-400 font-mono text-[11px]">${index + 1}</td>
-
-          <!-- 教材名稱 (全寬可讀) -->
           <td class="p-3">
             <input type="text" value="${item.title || ''}" placeholder="請輸入教材名稱"
                    onchange="updateItemTitle(${item.id}, this.value)"
                    class="apple-input w-full bg-transparent font-medium text-slate-900 border border-transparent hover:border-slate-200 rounded-lg px-2.5 py-1 text-xs">
           </td>
-
-          <!-- 目前在庫 -->
           <td class="p-3 text-right">
             <input type="number" min="0" value="${item.baseStock}"
                    onchange="updateBaseStock(${item.id}, this.value)"
                    class="apple-input w-20 text-right bg-transparent font-semibold text-slate-700 num-font border border-transparent hover:border-slate-200 rounded-lg px-2 py-1 text-xs">
           </td>
-
-          <!-- 異動狀態 (Apple 膠囊外觀) -->
           <td class="p-3 text-center">
             <select onchange="updateState(${item.id}, this.value)"
                     class="border rounded-lg px-2.5 py-1 font-semibold text-xs cursor-pointer outline-none transition-all duration-150 ${
@@ -285,40 +348,24 @@
               <option value="OUT" ${item.state === 'OUT' ? 'selected' : ''}>銷 (出 -)</option>
             </select>
           </td>
-
-          <!-- 數量 -->
           <td class="p-3 text-center">
             <input type="number" min="0" value="${item.qty}"
                    ${item.state === 'NONE' ? 'disabled' : ''}
                    onchange="updateQty(${item.id}, this.value)"
                    class="apple-input w-16 text-center border border-slate-200/80 rounded-lg px-2 py-1 font-semibold num-font text-xs ${item.state === 'NONE' ? '' : 'bg-white shadow-2xs'}">
           </td>
-
-          <!-- 結算數量 -->
           <td class="p-3 text-right bg-slate-50/40 border-x border-slate-200/50">
             <span class="font-bold text-sm num-font tracking-tight ${isAlert ? 'text-rose-600 font-extrabold' : 'text-slate-900'}">
               ${finalStock}
             </span>
           </td>
-
-          <!-- 前次更新 -->
-          <td class="p-3 text-center text-slate-400 font-mono text-[11px]">
-            ${item.prevDate || '-'}
-          </td>
-
-          <!-- 本次更新 -->
-          <td class="p-3 text-center font-mono text-[11px] font-semibold text-slate-700">
-            ${item.lastDate || '-'}
-          </td>
-
-          <!-- 經手人 -->
+          <td class="p-3 text-center text-slate-400 font-mono text-[11px]">${item.prevDate || '-'}</td>
+          <td class="p-3 text-center font-mono text-[11px] font-semibold text-slate-700">${item.lastDate || '-'}</td>
           <td class="p-3 text-center">
             <span class="inline-block font-medium text-[11px] text-slate-600 bg-slate-100/70 border border-slate-200/60 px-2 py-0.5 rounded-md">
               ${item.operator || '系統自動'}
             </span>
           </td>
-
-          <!-- 狀態列：正常 (綠) / 要動作 (紅) -->
           <td class="p-3 text-center">
             ${isAlert ? `
               <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-600 border border-rose-200/80 shadow-2xs">
@@ -331,17 +378,121 @@
             `}
           </td>
         `;
-
         tbody.appendChild(tr);
       });
 
-      document.getElementById('stat-total-items').textContent = inventory.length;
-      document.getElementById('stat-alert-items').textContent = alertCount;
-
       updateBatchUI();
-      lucide.createIcons();
     }
 
+    // 渲染重複寄送損耗表格
+    function renderLossTable() {
+      const tbody = document.getElementById('loss-tbody');
+      tbody.innerHTML = '';
+
+      if (appData.lossLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-xs text-slate-400 font-medium">本月暫無重複寄送與包裝報廢紀錄。</td></tr>`;
+        return;
+      }
+
+      appData.lossLogs.forEach((log, index) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-amber-50/30 transition-colors duration-150';
+
+        tr.innerHTML = `
+          <td class="p-2.5 text-center text-amber-700/60 font-mono text-[11px]">${index + 1}</td>
+          <td class="p-2.5 text-center font-mono text-xs text-slate-600">
+            <input type="date" value="${log.date}" onchange="updateLoss(${log.id}, 'date', this.value)"
+                   class="apple-input bg-transparent border border-transparent hover:border-amber-200 rounded px-1.5 py-0.5 text-xs text-center">
+          </td>
+          <td class="p-2.5">
+            <input type="text" value="${log.content}" placeholder="註明浪費內容與原因 (多本可合併填寫)"
+                   onchange="updateLoss(${log.id}, 'content', this.value)"
+                   class="apple-input w-full bg-white border border-amber-200/80 rounded-lg px-2.5 py-1 text-xs text-amber-950 font-medium focus:border-amber-500">
+          </td>
+          <td class="p-2.5 text-center">
+            <input type="number" min="1" value="${log.books}" onchange="updateLoss(${log.id}, 'books', this.value)"
+                   class="apple-input w-16 text-center bg-white border border-amber-200/80 rounded-lg px-1.5 py-1 text-xs font-bold text-amber-900 num-font">
+          </td>
+          <td class="p-2.5 text-right">
+            <div class="flex items-center justify-end gap-1">
+              <span class="text-rose-600 font-bold">$</span>
+              <input type="number" min="0" step="50" value="${log.cost}" onchange="updateLoss(${log.id}, 'cost', this.value)"
+                     class="apple-input w-24 text-right bg-white border border-amber-200/80 rounded-lg px-2 py-1 text-xs font-black text-rose-600 num-font">
+            </div>
+          </td>
+          <td class="p-2.5 text-center">
+            <span class="inline-block font-bold text-[11px] text-amber-900 bg-amber-100/80 border border-amber-200 px-2.5 py-0.5 rounded-md">
+              ${log.operator}
+            </span>
+          </td>
+          <td class="p-2.5 text-center">
+            <button onclick="deleteLossRow(${log.id})" class="text-slate-400 hover:text-rose-600 p-1 rounded transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 更新頂部總計看板
+    function updateHeaderStats() {
+      let alertCount = 0;
+      appData.inventory.forEach(item => {
+        if (calcFinalStock(item) < 10) alertCount++;
+      });
+
+      let totalBooks = 0;
+      let totalCost = 0;
+      appData.lossLogs.forEach(log => {
+        totalBooks += (Number(log.books) || 0);
+        totalCost += (Number(log.cost) || 0);
+      });
+
+      document.getElementById('stat-total-items').textContent = appData.inventory.length;
+      document.getElementById('stat-alert-items').textContent = alertCount;
+      document.getElementById('stat-loss-books').textContent = totalBooks;
+      document.getElementById('stat-loss-amount').textContent = `$ ${totalCost.toLocaleString()}`;
+    }
+
+    // 登記重複寄送事故 (核心功能)
+    function addLossRow() {
+      const today = getTaipeiDate();
+      const newLoss = {
+        id: Date.now(),
+        date: today,
+        content: '重複寄送事故 (請填寫包含之教材與原因)',
+        books: 1,
+        cost: 350,
+        operator: currentOperator
+      };
+      appData.lossLogs.unshift(newLoss); // 放在第一列以求醒目
+      saveData();
+      render();
+    }
+
+    function updateLoss(id, field, value) {
+      const log = appData.lossLogs.find(r => r.id === id);
+      if (log) {
+        if (field === 'books' || field === 'cost') {
+          log[field] = Math.max(0, parseInt(value) || 0);
+        } else {
+          log[field] = value;
+        }
+        saveData();
+        render();
+      }
+    }
+
+    function deleteLossRow(id) {
+      if (confirm('確定要移除此筆重複寄送紀錄嗎？')) {
+        appData.lossLogs = appData.lossLogs.filter(r => r.id !== id);
+        saveData();
+        render();
+      }
+    }
+
+    // 常態庫存操作函式
     function toggleSelect(id, checked) {
       if (checked) selectedIds.add(id);
       else selectedIds.delete(id);
@@ -350,7 +501,7 @@
 
     function toggleSelectAll(checked) {
       if (checked) {
-        inventory.forEach(item => selectedIds.add(item.id));
+        appData.inventory.forEach(item => selectedIds.add(item.id));
       } else {
         selectedIds.clear();
       }
@@ -365,21 +516,21 @@
 
       if (count > 0) {
         btn.disabled = false;
-        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-rose-200 bg-rose-500 hover:bg-rose-600 text-white cursor-pointer shadow-xs active:scale-[0.98]';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all duration-200 border border-rose-200 bg-rose-500 hover:bg-rose-600 text-white cursor-pointer shadow-xs active:scale-[0.98]';
         label.textContent = `刪除已選 (${count})`;
       } else {
         btn.disabled = true;
-        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed';
         label.textContent = '刪除已選';
       }
 
-      checkAll.checked = inventory.length > 0 && selectedIds.size === inventory.length;
+      checkAll.checked = appData.inventory.length > 0 && selectedIds.size === appData.inventory.length;
     }
 
     function batchDeleteSelected() {
       if (selectedIds.size === 0) return;
-      if (confirm(`確定要刪除選取的 ${selectedIds.size} 筆教材品項嗎？`)) {
-        inventory = inventory.filter(item => !selectedIds.has(item.id));
+      if (confirm(`確定要刪除選取的 ${selectedIds.size} 筆常態教材嗎？`)) {
+        appData.inventory = appData.inventory.filter(item => !selectedIds.has(item.id));
         selectedIds.clear();
         saveData();
         render();
@@ -387,7 +538,7 @@
     }
 
     function updateState(id, newState) {
-      const item = inventory.find(r => r.id === id);
+      const item = appData.inventory.find(r => r.id === id);
       if (item) {
         touchAudit(item);
         item.state = newState;
@@ -398,7 +549,7 @@
     }
 
     function updateQty(id, val) {
-      const item = inventory.find(r => r.id === id);
+      const item = appData.inventory.find(r => r.id === id);
       if (item) {
         touchAudit(item);
         item.qty = Math.max(0, parseInt(val) || 0);
@@ -408,7 +559,7 @@
     }
 
     function updateBaseStock(id, val) {
-      const item = inventory.find(r => r.id === id);
+      const item = appData.inventory.find(r => r.id === id);
       if (item) {
         touchAudit(item);
         item.baseStock = Math.max(0, parseInt(val) || 0);
@@ -418,7 +569,7 @@
     }
 
     function updateItemTitle(id, val) {
-      const item = inventory.find(r => r.id === id);
+      const item = appData.inventory.find(r => r.id === id);
       if (item) {
         touchAudit(item);
         item.title = val;
@@ -439,7 +590,7 @@
         operator: currentOperator
       };
 
-      inventory.push(newItem);
+      appData.inventory.push(newItem);
       saveData();
       render();
     }
