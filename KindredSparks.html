@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>邱小民社會 ｜ 教材庫存與損耗稽核系統</title>
+  <title>邱小民社會 ｜ 教材庫存與出貨管理系統</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -42,7 +42,7 @@
 </head>
 <body class="bg-[#f5f5f7] text-[#1d1d1f] min-h-screen flex flex-col p-4 sm:p-6 w-full antialiased selection:bg-indigo-500 selection:text-white space-y-4">
 
-  <!-- 頂部 Apple 導覽列：操作者身分、事故登記按鈕與核心財務警示 -->
+  <!-- 頂部 Apple 導覽列：操作員切換、重寄登記與狀態統計 -->
   <header class="w-full bg-white/80 apple-blur border border-slate-200/80 rounded-2xl px-5 py-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
     <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
       
@@ -51,21 +51,21 @@
         <div class="flex items-center gap-2.5">
           <h1 class="text-base sm:text-lg font-bold tracking-tight text-[#1d1d1f]">邱小民社會教學團隊</h1>
           <span class="text-[11px] font-semibold text-slate-500 tracking-wider uppercase px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200/60">
-            Inventory & Loss Audit
+            Inventory & Dispatch
           </span>
         </div>
         <p class="text-xs text-slate-400 mt-0.5 font-normal tracking-normal">
-          正規進銷存帳目 ｜ 人為重複寄送損耗歸屬追蹤
+          常態教材庫存狀態機 ｜ 教材補寄與重寄報備登記
         </p>
       </div>
 
-      <!-- 右側工具區：操作者切換、新增損耗按鈕與數據統計 -->
+      <!-- 右側工具區：操作員選單、重寄登記按鈕、批次刪除與數據膠囊 -->
       <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
         
         <!-- 當前操作員選單 -->
         <div class="flex items-center gap-2 bg-slate-100/70 border border-slate-200/60 pl-2.5 pr-3 py-1.5 rounded-xl text-xs">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span class="text-[11px] font-medium text-slate-400">登入者</span>
+          <span class="text-[11px] font-medium text-slate-400">填表人</span>
           <select id="operatorSelect" onchange="switchOperator(this.value)" 
                   class="bg-transparent font-semibold text-slate-800 cursor-pointer outline-none text-xs">
             <option value="邱小民 (負責人)">邱小民 (chiu.boss@gmail.com)</option>
@@ -76,21 +76,21 @@
           </select>
         </div>
 
-        <!-- 專用按鈕：登記重複寄送事故 -->
-        <button onclick="addLossRow()" 
-                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-amber-300 bg-amber-500 hover:bg-amber-600 text-white cursor-pointer shadow-xs active:scale-[0.98]">
-          <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
-          <span>＋ 登記重複寄送事故</span>
+        <!-- 友善中性按鈕：登記重寄/補寄 -->
+        <button onclick="addReshipRow()" 
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer shadow-xs active:scale-[0.98]">
+          <i data-lucide="package-plus" class="w-3.5 h-3.5 text-indigo-600"></i>
+          <span>＋ 登記教材重寄／補寄</span>
         </button>
 
-        <!-- 批次刪除在庫按鈕 -->
+        <!-- 批次刪除常態教材按鈕 -->
         <button id="btn-batch-delete" onclick="batchDeleteSelected()" disabled
                 class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all duration-200 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span id="label-batch-delete">刪除已選</span>
         </button>
 
-        <!-- 統計數據膠囊 -->
+        <!-- 數據統計膠囊 -->
         <div class="flex items-center gap-2">
           <div class="bg-slate-100/80 border border-slate-200/60 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
             <span class="text-xs text-slate-500 font-medium">在庫品項</span>
@@ -102,10 +102,9 @@
             <span id="stat-alert-items" class="text-xs font-bold text-rose-600 num-font">0</span>
           </div>
 
-          <!-- 全月重複寄送虧損累計 -->
-          <div class="bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-            <span class="text-xs text-amber-800 font-medium">重寄虧損</span>
-            <span id="stat-loss-amount" class="text-xs font-black text-rose-600 num-font">$ 0</span>
+          <div class="bg-indigo-50 border border-indigo-200/60 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+            <span class="text-xs text-indigo-700 font-medium">重寄件數</span>
+            <span id="stat-reship-count" class="text-xs font-bold text-indigo-700 num-font">0 筆</span>
           </div>
         </div>
 
@@ -113,33 +112,36 @@
     </div>
   </header>
 
-  <!-- 區塊一：人為重複寄送 / 報廢事故責任清冊 (獨立表格) -->
-  <section class="w-full bg-white/90 apple-blur border border-amber-200/80 rounded-2xl shadow-[0_4px_24px_rgba(245,158,11,0.04)] overflow-hidden flex flex-col">
-    <div class="px-5 py-3 bg-amber-50/50 border-b border-amber-200/60 flex items-center justify-between">
+  <!-- 區塊一：教材重寄／補寄回報專用區 (三格極簡填寫) -->
+  <section class="w-full bg-white/90 apple-blur border border-slate-200/80 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col">
+    <div class="px-5 py-3 bg-slate-50/60 border-b border-slate-200/60 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-        <h2 class="text-xs font-bold text-amber-900 tracking-tight">人為重複寄送與包裝報廢事故稽核單</h2>
-        <span class="text-[10px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded-md">不可扣抵責任帳</span>
+        <h2 class="text-xs font-bold text-slate-800 tracking-tight">教材重寄／補寄報備專區</h2>
+        <span class="text-[10px] bg-slate-200/70 text-slate-600 font-semibold px-2 py-0.5 rounded-md">出貨異常備查</span>
       </div>
-      <div class="text-[11px] text-amber-800 font-medium">
-        累計事故損耗本數：<strong id="stat-loss-books" class="font-bold text-rose-600 num-font">0</strong> 本
+      <div class="text-[11px] text-slate-400">
+        當月重寄累計本數：<strong id="stat-reship-books" class="font-bold text-slate-700 num-font">0</strong> 本
       </div>
     </div>
 
     <div class="overflow-x-auto w-full">
       <table class="w-full text-left text-xs border-collapse table-auto">
         <thead>
-          <tr class="bg-amber-50/30 text-amber-900/70 font-semibold border-b border-amber-100 text-center tracking-tight">
-            <th class="p-2.5 w-12 font-mono text-[11px]">#</th>
-            <th class="p-2.5 w-28 text-center">事故日期</th>
-            <th class="p-2.5 text-left min-w-[280px]">浪費教材內容與事故描述 (例：國二講義2本+歷屆試題1本)</th>
-            <th class="p-2.5 w-24 text-center">損耗本數</th>
-            <th class="p-2.5 w-28 text-right">預估虧損金額</th>
-            <th class="p-2.5 min-w-[150px] text-center">責任經手人</th>
+          <tr class="bg-slate-50/40 text-slate-500 font-semibold border-b border-slate-200/60 text-center tracking-tight">
+            <th class="p-2.5 w-12 font-mono text-[11px] text-slate-400">#</th>
+            <th class="p-2.5 w-28 text-center">報備日期</th>
+            <!-- 格子 1：原因 -->
+            <th class="p-2.5 text-left w-1/3 min-w-[220px]">重寄／補寄原因 (直接說明)</th>
+            <!-- 格子 2：商品內容 -->
+            <th class="p-2.5 text-left min-w-[260px]">教材商品內容 (例：國二社會2本+歷屆試題1本)</th>
+            <!-- 格子 3：數量 -->
+            <th class="p-2.5 w-24 text-center">總本數</th>
+            <th class="p-2.5 min-w-[150px] text-center">填表經手人</th>
             <th class="p-2.5 w-16 text-center">操作</th>
           </tr>
         </thead>
-        <tbody id="loss-tbody" class="divide-y divide-amber-100/60">
+        <tbody id="reship-tbody" class="divide-y divide-slate-100">
           <!-- 由 JavaScript 渲染 -->
         </tbody>
       </table>
@@ -153,7 +155,7 @@
         <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
         <h2 class="text-xs font-bold text-slate-800 tracking-tight">常態教材進銷存與庫存狀態機</h2>
       </div>
-      <span class="text-[11px] text-slate-400">維持常態進銷運算，低於 10 本亮紅燈提示</span>
+      <span class="text-[11px] text-slate-400">低於 10 本自動提示「要動作」</span>
     </div>
 
     <div class="overflow-x-auto w-full">
@@ -194,11 +196,11 @@
 
   <footer class="w-full px-1 flex justify-between items-center text-[11px] text-slate-400 tracking-tight">
     <span>時區基準：台北時間 (Asia/Taipei)</span>
-    <span>事故記錄直接綁定當前登入者身分 ｜ 本地數據即時保存</span>
+    <span>資料即時儲存於本機瀏覽器 (localStorage)</span>
   </footer>
 
   <script>
-    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_SEPARATE_LOSS_v6';
+    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_HUMANE_v7';
 
     let currentOperator = '邱小民 (負責人)';
 
@@ -216,7 +218,6 @@
       }).replace(/\//g, '-');
     }
 
-    // 預設資料：包含一般庫存與獨立損耗事故
     const defaultData = {
       inventory: [
         {
@@ -250,13 +251,14 @@
           operator: '行政助教 A'
         }
       ],
-      lossLogs: [
+      // 重寄專用清單：格子 1: reason, 格子 2: content, 格子 3: books
+      reshipLogs: [
         {
-          id: 101,
+          id: 201,
           date: '2026-09-18',
-          content: '重複寄送林同學：國三模考本 2 本＋歷屆詳解 1 本 (含運費損耗)',
+          reason: '超商條碼印單重複，未核對系統名單',
+          content: '國三會考模考本 2 本＋歷屆全圖解 1 本',
           books: 3,
-          cost: 1050,
           operator: '行政工讀生'
         }
       ]
@@ -299,10 +301,9 @@
       item.operator = currentOperator;
     }
 
-    // 渲染主畫面
     function render() {
       renderInventoryTable();
-      renderLossTable();
+      renderReshipTable();
       updateHeaderStats();
       lucide.createIcons();
     }
@@ -384,49 +385,59 @@
       updateBatchUI();
     }
 
-    // 渲染重複寄送損耗表格
-    function renderLossTable() {
-      const tbody = document.getElementById('loss-tbody');
+    // 渲染重寄報備清冊 (三格輸入)
+    function renderReshipTable() {
+      const tbody = document.getElementById('reship-tbody');
       tbody.innerHTML = '';
 
-      if (appData.lossLogs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-xs text-slate-400 font-medium">本月暫無重複寄送與包裝報廢紀錄。</td></tr>`;
+      if (appData.reshipLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-xs text-slate-400 font-medium">本月暫無重寄或補寄紀錄。</td></tr>`;
         return;
       }
 
-      appData.lossLogs.forEach((log, index) => {
+      appData.reshipLogs.forEach((log, index) => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-amber-50/30 transition-colors duration-150';
+        tr.className = 'hover:bg-slate-50/60 transition-colors duration-150';
 
         tr.innerHTML = `
-          <td class="p-2.5 text-center text-amber-700/60 font-mono text-[11px]">${index + 1}</td>
+          <td class="p-2.5 text-center text-slate-400 font-mono text-[11px]">${index + 1}</td>
+          
+          <!-- 日期 -->
           <td class="p-2.5 text-center font-mono text-xs text-slate-600">
-            <input type="date" value="${log.date}" onchange="updateLoss(${log.id}, 'date', this.value)"
-                   class="apple-input bg-transparent border border-transparent hover:border-amber-200 rounded px-1.5 py-0.5 text-xs text-center">
+            <input type="date" value="${log.date}" onchange="updateReship(${log.id}, 'date', this.value)"
+                   class="apple-input bg-transparent border border-transparent hover:border-slate-200 rounded px-1.5 py-0.5 text-xs text-center">
           </td>
+
+          <!-- 格子 1：重寄原因 -->
           <td class="p-2.5">
-            <input type="text" value="${log.content}" placeholder="註明浪費內容與原因 (多本可合併填寫)"
-                   onchange="updateLoss(${log.id}, 'content', this.value)"
-                   class="apple-input w-full bg-white border border-amber-200/80 rounded-lg px-2.5 py-1 text-xs text-amber-950 font-medium focus:border-amber-500">
+            <input type="text" value="${log.reason || ''}" placeholder="請簡述重寄或補寄原因"
+                   onchange="updateReship(${log.id}, 'reason', this.value)"
+                   class="apple-input w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-medium focus:border-indigo-500">
           </td>
+
+          <!-- 格子 2：教材商品內容 -->
+          <td class="p-2.5">
+            <input type="text" value="${log.content || ''}" placeholder="請填寫補寄的教材內容 (例：國二社會講義1本)"
+                   onchange="updateReship(${log.id}, 'content', this.value)"
+                   class="apple-input w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-medium focus:border-indigo-500">
+          </td>
+
+          <!-- 格子 3：數量 (本數) -->
           <td class="p-2.5 text-center">
-            <input type="number" min="1" value="${log.books}" onchange="updateLoss(${log.id}, 'books', this.value)"
-                   class="apple-input w-16 text-center bg-white border border-amber-200/80 rounded-lg px-1.5 py-1 text-xs font-bold text-amber-900 num-font">
+            <input type="number" min="1" value="${log.books || 1}" onchange="updateReship(${log.id}, 'books', this.value)"
+                   class="apple-input w-16 text-center bg-white border border-slate-200/80 rounded-lg px-1.5 py-1 text-xs font-bold text-indigo-700 num-font">
           </td>
-          <td class="p-2.5 text-right">
-            <div class="flex items-center justify-end gap-1">
-              <span class="text-rose-600 font-bold">$</span>
-              <input type="number" min="0" step="50" value="${log.cost}" onchange="updateLoss(${log.id}, 'cost', this.value)"
-                     class="apple-input w-24 text-right bg-white border border-amber-200/80 rounded-lg px-2 py-1 text-xs font-black text-rose-600 num-font">
-            </div>
-          </td>
+
+          <!-- 責任填寫人 -->
           <td class="p-2.5 text-center">
-            <span class="inline-block font-bold text-[11px] text-amber-900 bg-amber-100/80 border border-amber-200 px-2.5 py-0.5 rounded-md">
+            <span class="inline-block font-medium text-[11px] text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
               ${log.operator}
             </span>
           </td>
+
+          <!-- 操作 -->
           <td class="p-2.5 text-center">
-            <button onclick="deleteLossRow(${log.id})" class="text-slate-400 hover:text-rose-600 p-1 rounded transition">
+            <button onclick="deleteReshipRow(${log.id})" class="text-slate-400 hover:text-rose-600 p-1 rounded transition">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </td>
@@ -435,7 +446,6 @@
       });
     }
 
-    // 更新頂部總計看板
     function updateHeaderStats() {
       let alertCount = 0;
       appData.inventory.forEach(item => {
@@ -443,39 +453,37 @@
       });
 
       let totalBooks = 0;
-      let totalCost = 0;
-      appData.lossLogs.forEach(log => {
+      appData.reshipLogs.forEach(log => {
         totalBooks += (Number(log.books) || 0);
-        totalCost += (Number(log.cost) || 0);
       });
 
       document.getElementById('stat-total-items').textContent = appData.inventory.length;
       document.getElementById('stat-alert-items').textContent = alertCount;
-      document.getElementById('stat-loss-books').textContent = totalBooks;
-      document.getElementById('stat-loss-amount').textContent = `$ ${totalCost.toLocaleString()}`;
+      document.getElementById('stat-reship-count').textContent = `${appData.reshipLogs.length} 筆`;
+      document.getElementById('stat-reship-books').textContent = totalBooks;
     }
 
-    // 登記重複寄送事故 (核心功能)
-    function addLossRow() {
+    // 新增重寄登記 (三格填寫)
+    function addReshipRow() {
       const today = getTaipeiDate();
-      const newLoss = {
+      const newLog = {
         id: Date.now(),
         date: today,
-        content: '重複寄送事故 (請填寫包含之教材與原因)',
+        reason: '',
+        content: '',
         books: 1,
-        cost: 350,
         operator: currentOperator
       };
-      appData.lossLogs.unshift(newLoss); // 放在第一列以求醒目
+      appData.reshipLogs.unshift(newLog); // 放在第一列
       saveData();
       render();
     }
 
-    function updateLoss(id, field, value) {
-      const log = appData.lossLogs.find(r => r.id === id);
+    function updateReship(id, field, value) {
+      const log = appData.reshipLogs.find(r => r.id === id);
       if (log) {
-        if (field === 'books' || field === 'cost') {
-          log[field] = Math.max(0, parseInt(value) || 0);
+        if (field === 'books') {
+          log[field] = Math.max(1, parseInt(value) || 1);
         } else {
           log[field] = value;
         }
@@ -484,15 +492,15 @@
       }
     }
 
-    function deleteLossRow(id) {
-      if (confirm('確定要移除此筆重複寄送紀錄嗎？')) {
-        appData.lossLogs = appData.lossLogs.filter(r => r.id !== id);
+    function deleteReshipRow(id) {
+      if (confirm('確定要移除此筆重寄備查紀錄嗎？')) {
+        appData.reshipLogs = appData.reshipLogs.filter(r => r.id !== id);
         saveData();
         render();
       }
     }
 
-    // 常態庫存操作函式
+    // 常態庫存操作
     function toggleSelect(id, checked) {
       if (checked) selectedIds.add(id);
       else selectedIds.delete(id);
