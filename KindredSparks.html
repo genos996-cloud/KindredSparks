@@ -1,589 +1,379 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Gentle Light｜微光協作・NPO 科技陪伴藍圖</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>邱小民社會 ｜ 教材庫存營運管理系統</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-    :root {
-      /* 宣紙、水墨、陶土與苔綠調 */
-      --paper-bg: #f5f0e6;
-      --card-bg: rgba(255, 252, 247, 0.9);
-      --ink-dark: #221f1c;        /* 濃墨 */
-      --ink-muted: #574f46;       /* 焦茶淡墨 */
-      --cinnabar: #b84a39;        /* 硃砂紅 */
-      --cinnabar-soft: #fbf0ee;
-      --moss: #335345;            /* 苔綠 */
-      --moss-soft: #edf3f0;
-      --border-ink: #ded6c8;
-      --radius-organic: 18px;
-      --shadow-paper: 0 6px 24px rgba(60, 50, 40, 0.06);
-      --font-serif: "Noto Serif TC", "Songti TC", "Source Han Serif TC", serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* 宣紙質地與纖維背景 */
     body {
-      background-color: var(--paper-bg);
-      background-image: 
-        radial-gradient(circle at 15% 20%, rgba(220, 210, 195, 0.45) 0%, transparent 25%),
-        radial-gradient(circle at 85% 80%, rgba(215, 202, 185, 0.4) 0%, transparent 30%),
-        repeating-radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.012) 0, rgba(0, 0, 0, 0.012) 1px, transparent 1px, transparent 60px);
-      color: var(--ink-dark);
-      font-family: var(--font-serif);
-      line-height: 1.85;
-      padding: 60px 24px 110px;
-      -webkit-font-smoothing: antialiased;
-      word-break: keep-all;
-      overflow-wrap: break-word;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
     }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      position: relative;
+    .num-font {
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
     }
-
-    /* 頂部 Header 與核心分工三元論 */
-    .header {
-      text-align: center;
-      margin-bottom: 58px;
-      position: relative;
-    }
-
-    .seal-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 20px;
-      background: var(--moss-soft);
-      color: var(--moss);
-      border: 1px solid rgba(63, 94, 80, 0.28);
-      border-radius: 99px;
-      font-size: 16px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      margin-bottom: 22px;
-    }
-
-    .header h1 {
-      font-size: 40px;
-      font-weight: 900;
-      letter-spacing: 0.02em;
-      margin-bottom: 26px;
-      line-height: 1.4;
-      color: var(--ink-dark);
-    }
-
-    /* 核心協作三元論 */
-    .trinity-card {
-      background: rgba(255, 252, 247, 0.96);
-      border: 1px solid var(--border-ink);
-      border-radius: var(--radius-organic);
-      padding: 28px 32px;
-      margin: 0 auto 26px;
-      box-shadow: var(--shadow-paper);
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      text-align: left;
-    }
-
-    .trinity-col {
-      border-left: 2.5px solid rgba(184, 74, 57, 0.35);
-      padding-left: 18px;
-    }
-
-    .trinity-sub {
-      font-size: 16px;
-      color: var(--ink-muted);
-      line-height: 1.6;
-      margin-bottom: 6px;
-    }
-
-    .trinity-target {
-      font-size: 19px;
-      font-weight: 700;
-      color: var(--ink-dark);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .trinity-target span {
-      color: var(--cinnabar);
-    }
-
-    .header-mission {
-      font-size: 19px;
-      font-weight: 600;
-      color: var(--moss);
-      letter-spacing: 0.04em;
-      margin-top: 18px;
-      line-height: 1.6;
-    }
-
-    /* 區塊標題 */
-    .section-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 22px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      letter-spacing: 0.04em;
-    }
-
-    .section-title::before {
-      content: "";
-      display: inline-block;
-      width: 5px;
-      height: 22px;
-      background: var(--cinnabar);
-      border-radius: 2px;
-    }
-
-    /* 痛點卡片 */
-    .pain-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 54px;
-    }
-
-    .pain-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-ink);
-      border-radius: var(--radius-organic);
-      padding: 26px 28px;
-      box-shadow: var(--shadow-paper);
-      backdrop-filter: blur(4px);
-    }
-
-    .pain-q {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--cinnabar);
-      margin-bottom: 10px;
-      letter-spacing: 0.02em;
-      line-height: 1.45;
-    }
-
-    .pain-a {
-      font-size: 17px;
-      color: var(--ink-dark);
-      line-height: 1.75;
-    }
-
-    /* 三階培力 */
-    .curriculum-box {
-      margin-bottom: 54px;
-    }
-
-    .stage-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-ink);
-      border-radius: var(--radius-organic);
-      padding: 30px 34px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-paper);
-    }
-
-    .stage-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 18px;
-      padding-bottom: 14px;
-      border-bottom: 1px dashed var(--border-ink);
-    }
-
-    .stage-num {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--moss);
-      letter-spacing: 0.08em;
-      margin-bottom: 2px;
-    }
-
-    .stage-name {
-      font-size: 22px;
-      font-weight: 700;
-    }
-
-    .stage-limit {
-      font-size: 14px;
-      background: #ece4d5;
-      color: var(--ink-muted);
-      padding: 4px 14px;
-      border-radius: 99px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .tool-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .tool-item {
-      background: rgba(246, 240, 230, 0.75);
-      border: 1px solid rgba(222, 214, 200, 0.85);
-      border-radius: 14px;
-      padding: 18px 20px;
-    }
-
-    .tool-item strong {
-      display: block;
-      font-size: 18px;
-      color: var(--ink-dark);
-      margin-bottom: 6px;
-      font-weight: 700;
-      line-height: 1.4;
-    }
-
-    .tool-item span {
-      display: block;
-      font-size: 15px;
-      color: var(--ink-muted);
-      line-height: 1.65;
-    }
-
-    /* 壓軸：真人陪跑 ＋ 志工精神與知識平權誓言 */
-    .unified-manifesto {
-      background: var(--card-bg);
-      border: 1.8px solid var(--cinnabar);
-      border-radius: var(--radius-organic);
-      padding: 44px 38px;
-      box-shadow: 0 12px 34px rgba(184, 74, 57, 0.08);
-      position: relative;
-    }
-
-    .manifesto-header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .manifesto-tag {
-      display: inline-block;
-      background: var(--cinnabar-soft);
-      color: var(--cinnabar);
-      font-size: 15px;
-      font-weight: 700;
-      padding: 4px 18px;
-      border-radius: 99px;
-      letter-spacing: 0.1em;
-      margin-bottom: 14px;
-    }
-
-    .manifesto-lead {
-      font-size: 27px;
-      font-weight: 900;
-      color: var(--ink-dark);
-      margin-bottom: 12px;
-      letter-spacing: 0.02em;
-      line-height: 1.4;
-    }
-
-    .manifesto-quote {
-      font-size: 18px;
-      color: var(--ink-muted);
-      max-width: 680px;
-      margin: 0 auto;
-      line-height: 1.8;
-    }
-
-    /* 支援方式管道 */
-    .support-channels {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin: 32px 0;
-    }
-
-    .channel-block {
-      background: rgba(246, 240, 230, 0.85);
-      border: 1px solid var(--border-ink);
-      border-radius: 16px;
-      padding: 20px 16px;
-      text-align: center;
-    }
-
-    .channel-icon {
-      font-size: 26px;
-      margin-bottom: 6px;
-    }
-
-    .channel-name {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--ink-dark);
-      margin-bottom: 4px;
-    }
-
-    .channel-tip {
-      font-size: 14px;
-      color: var(--ink-muted);
-      line-height: 1.5;
-    }
-
-    /* 壓軸結尾：志工服務真諦 ＋ 平權願景 */
-    .manifesto-footer {
-      border-top: 1px dashed var(--border-ink);
-      padding-top: 30px;
-      text-align: center;
-    }
-
-    .service-creed {
-      display: inline-block;
-      background: #faf4ea;
-      border: 1px solid var(--border-ink);
-      border-radius: 12px;
-      padding: 14px 24px;
-      margin-bottom: 22px;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--cinnabar);
-      letter-spacing: 0.04em;
-    }
-
-    .footer-vision {
-      font-size: 23px;
-      font-weight: 900;
-      color: var(--moss);
-      margin-bottom: 12px;
-      letter-spacing: 0.04em;
-      line-height: 1.45;
-    }
-
-    .footer-sub {
-      font-size: 17px;
-      color: var(--ink-muted);
-      line-height: 1.85;
-      max-width: 740px;
-      margin: 0 auto;
-    }
-
-    @media (max-width: 720px) {
-      .trinity-card, .pain-grid, .tool-grid, .support-channels {
-        grid-template-columns: 1fr;
-      }
-      .trinity-col {
-        border-left: none;
-        border-top: 1px dashed var(--border-ink);
-        padding-left: 0;
-        padding-top: 14px;
-      }
-      .trinity-col:first-child {
-        border-top: none;
-        padding-top: 0;
-      }
-      .header h1 {
-        font-size: 32px;
-      }
-      .unified-manifesto {
-        padding: 32px 20px;
-      }
+    input:disabled, select:disabled {
+      background-color: #f1f5f9 !important;
+      color: #94a3b8 !important;
+      border-color: #e2e8f0 !important;
+      cursor: not-allowed;
     }
   </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col p-4 sm:p-6">
 
-  <div class="container">
-
-    <!-- 頂部 Header 與核心分工三元論 -->
-    <header class="header">
-      <div class="seal-badge">
-        <span>The Gentle Light</span>・社團法人台灣數位文化協會・科技平權實踐
-      </div>
-      <h1>把時間留給陪伴，把瑣事交給科技</h1>
-
-      <!-- 頭部協作核心分工 -->
-      <div class="trinity-card">
-        <div class="trinity-col">
-          <div class="trinity-sub">繁雜標準化、不斷重複的事</div>
-          <div class="trinity-target">交給 <span>程式</span></div>
+  <!-- 頂部標題與核心統計 -->
+  <header class="max-w-6xl w-full mx-auto mb-5">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black shadow-sm">
+          <i data-lucide="book-open" class="w-5 h-5"></i>
         </div>
-        <div class="trinity-col">
-          <div class="trinity-sub">創意技術實現與靈感擴展</div>
-          <div class="trinity-target">交給 <span>AI</span></div>
-        </div>
-        <div class="trinity-col">
-          <div class="trinity-sub">真正重要的決策、品味與溝通</div>
-          <div class="trinity-target">交給 <span>人類</span></div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">邱小民社會 ｜ 教材庫存管理</h1>
+            <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200">單一部門進銷存</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">即時狀態機運算：進貨(+)、出貨(-)、無變動(凍結)，庫存低於 10 本即時預警</p>
         </div>
       </div>
 
-      <div class="header-mission">
-        讓 NGO 可以用最少的人，實現最大的社會影響力。
-      </div>
-    </header>
-
-    <!-- 同理心痛點化解 -->
-    <div class="section-title">化解焦慮・我們深知第一線夥伴的顧慮</div>
-    <div class="pain-grid">
-      <div class="pain-card">
-        <div class="pain-q">顧慮一：非資訊背景出身，真能學得懂嗎？</div>
-        <div class="pain-a"><strong>答：完全不講技術術語。</strong>借生活經驗為喻，如同平日與同仁交代日常事務般自然親切。</div>
-      </div>
-      <div class="pain-card">
-        <div class="pain-q">顧慮二：課堂聽懂了，回組織卡住怎麼辦？</div>
-        <div class="pain-a"><strong>答：字卡整套帶回辦公室。</strong>整理好 NPO 最常用的信件與活動範本，貼上即可順暢改寫。</div>
-      </div>
-      <div class="pain-card">
-        <div class="pain-q">顧慮三：非營利組織資源有限，負擔得起嗎？</div>
-        <div class="pain-a"><strong>答：極低訂閱成本換取最大效益。</strong>完全免費的工具多有限制與品質隱患；我們教大家挑選幾百元便能大幅減負的實用方案。</div>
-      </div>
-      <div class="pain-card">
-        <div class="pain-q">顧慮四：經手捐款人與受助家庭，個資會洩漏嗎？</div>
-        <div class="pain-a"><strong>答：資安與合規防護為首要。</strong>落實權限隔離，確保志工僅能閱覽負責之個案，守護弱勢隱私。</div>
-      </div>
-    </div>
-
-    <!-- 三階梯培力課程 -->
-    <div class="section-title">階梯扎根（修畢初階方得進階）</div>
-    <div class="curriculum-box">
-
-      <!-- 第一階 -->
-      <div class="stage-card">
-        <div class="stage-top">
-          <div>
-            <div class="stage-num">STAGE 01 ・ 日常減負</div>
-            <div class="stage-name">AI 通用語言與行政效率起步</div>
-          </div>
-          <div class="stage-limit">全員零基礎可修</div>
+      <!-- 統計數據徽章 -->
+      <div class="flex items-center gap-2">
+        <div class="bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-500">品項總數</span>
+          <span id="stat-total-items" class="text-sm font-black text-slate-800 num-font">0</span>
         </div>
-        <div class="tool-grid">
-          <div class="tool-item">
-            <strong>Markdown (MD) 格式</strong>
-            <span>＝ 螢光筆劃重點。讓公文、志工召集令、結案草稿層次井然，文字不再擁擠雜亂。</span>
-          </div>
-          <div class="tool-item">
-            <strong>Skill 專屬角色約制</strong>
-            <span>＝ 到職工作說明書。一次定調組織語氣與原則，跨手機與電腦隨身帶著走，無需次次重述。</span>
-          </div>
-          <div class="tool-item">
-            <strong>公文與感謝函處理</strong>
-            <span>迅速完成長文摘要與信件草擬，將雙手自重複鍵盤敲擊中釋放出來。</span>
-          </div>
-          <div class="tool-item">
-            <strong>課後產出</strong>
-            <span>「NPO 行政常用字卡包」，隔日返工即可立即運用於手邊公務。</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 第二階 -->
-      <div class="stage-card">
-        <div class="stage-top">
-          <div>
-            <div class="stage-num">STAGE 02 ・ 宣傳與結構化</div>
-            <div class="stage-name">資料整理與輕量活動架站</div>
-          </div>
-          <div class="stage-limit">須修畢第一階</div>
-        </div>
-        <div class="tool-grid">
-          <div class="tool-item">
-            <strong>JSON 結構化輸出</strong>
-            <span>＝ 透明分類收納盒。問卷與回饋自動歸納整齊，直接納入試算表，省去人工登打之苦。</span>
-          </div>
-          <div class="tool-item">
-            <strong>架站三兄弟 (HTML + GitHub + Vercel)</strong>
-            <span>以極精簡之成本架構，為協會打造專屬的一頁式倡議或活動網頁。</span>
-          </div>
-          <div class="tool-item">
-            <strong>拍神 (Python) 規律助手</strong>
-            <span>面對大量檔案改名或名單比對，請 AI 協作輕量小工具批次處理。</span>
-          </div>
-          <div class="tool-item">
-            <strong>課後產出</strong>
-            <span>為所屬機構正式發布專屬的「活動報名 / 倡議宣傳網頁」。</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 第三階 -->
-      <div class="stage-card">
-        <div class="stage-top">
-          <div>
-            <div class="stage-num">STAGE 03 ・ 安全守門員</div>
-            <div class="stage-name">輕量資料庫建置與個資資安管理</div>
-          </div>
-          <div class="stage-limit">核心種子夥伴限定</div>
-        </div>
-        <div class="tool-grid">
-          <div class="tool-item">
-            <strong>Supabase 雲端資料庫</strong>
-            <span>告別通訊軟體內散落傳遞檔案的隱患，建立結構明晰之雲端資料表。</span>
-          </div>
-          <div class="tool-item">
-            <strong>Row Level Security (RLS)</strong>
-            <span>嚴格落實權限控管：每位志工僅能存取其負責之名冊，根絕外洩風險。</span>
-          </div>
-          <div class="tool-item">
-            <strong>合規與流程防護</strong>
-            <span>以合宜負擔落實法規標準，為受助者與捐款紀錄築起安全防線。</span>
-          </div>
-          <div class="tool-item">
-            <strong>課後產出</strong>
-            <span>一套具備權限隔離機制的組織「安全個資管理原型」。</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- 壓軸串合：真人陪跑 ＋ 志工真諦 ＋ 知識平權誓言 -->
-    <div class="unified-manifesto">
-      <div class="manifesto-header">
-        <div class="manifesto-tag">✦ 溫暖承諾・我教我負責 ✦</div>
-        <div class="manifesto-lead">學習遇到卡關？別擔心，線上隨時有真人老師陪你。</div>
-        <div class="manifesto-quote">
-          學會工具只是起點，實踐路上難免遇到意外。只要在日常應用中遇到任何指令不順或卡點，不用自己焦慮，隨時找得到人協助你排解。
-        </div>
-      </div>
-
-      <div class="support-channels">
-        <div class="channel-block">
-          <div class="channel-icon">📞</div>
-          <div class="channel-name">打到辦公室給我</div>
-          <div class="channel-tip">上班時間專線電話解惑</div>
-        </div>
-        <div class="channel-block">
-          <div class="channel-icon">💬</div>
-          <div class="channel-name">傳 LINE 截圖給我</div>
-          <div class="channel-tip">看到後第一時間協助排解</div>
-        </div>
-        <div class="channel-block">
-          <div class="channel-icon">🖥️</div>
-          <div class="channel-name">約 Meet 螢幕共享</div>
-          <div class="channel-tip">看著畫面帶你跨過瓶頸</div>
-        </div>
-      </div>
-
-      <!-- 壓軸結尾：志工服務心法與平權初衷 -->
-      <div class="manifesto-footer">
-        <div class="service-creed">
-          「服務，永遠建立在他人的真實需求之上。」
-        </div>
-        <div class="footer-vision">先有需求，後有服務；先有同理，科技始有靈魂。</div>
-        <div class="footer-sub">
-          我們不追求炫目的技術堆疊，只在乎第一線夥伴是否真正被減負、被陪伴。<br>
-          讓科技成為照亮角落的燈火，讓非營利夥伴多一分從容，社會便能多獲得十倍溫暖的守護力量。
+        <div class="bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg shadow-xs flex items-center gap-2">
+          <span class="text-xs font-bold text-rose-700">待決策 (＜10)</span>
+          <span id="stat-alert-items" class="text-sm font-black text-rose-600 num-font">0</span>
         </div>
       </div>
     </div>
+  </header>
 
-  </div>
+  <!-- 主庫存工作表單 -->
+  <main class="max-w-6xl w-full mx-auto bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1">
+    
+    <div class="overflow-x-auto w-full">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 text-center">
+            <th class="p-2.5 w-12">序</th>
+            <th class="p-2.5 w-28 text-left">教材料號</th>
+            <th class="p-2.5 text-left min-w-[180px]">教材品名與版本</th>
+            <th class="p-2.5 w-24 text-right">目前在庫</th>
+            <th class="p-2.5 w-24">異動狀態</th>
+            <th class="p-2.5 w-24">異動數量</th>
+            <th class="p-2.5 w-24 text-right bg-slate-50 border-x border-slate-200 font-black">結算數量</th>
+            <th class="p-2.5 w-24 text-center">前次更新</th>
+            <th class="p-2.5 w-24 text-center">本次更新</th>
+            <th class="p-2.5 w-24 text-center">庫存狀態</th>
+            <th class="p-2.5 w-16 text-center">操作</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-tbody" class="divide-y divide-slate-100">
+          <!-- 動態由 JavaScript 注入每一列 -->
+        </tbody>
+      </table>
+    </div>
 
+    <!-- 底部超好用一鍵新增教材按鈕 -->
+    <div class="p-3 bg-slate-50 border-t border-slate-200">
+      <button onclick="addNewItemRow()" 
+              class="w-full py-2.5 px-4 bg-white hover:bg-indigo-50 border-2 border-dashed border-indigo-300 hover:border-indigo-500 rounded-lg text-indigo-700 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs">
+        <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-600"></i>
+        <span>＋ 點擊新增全新教材料號 (永久擴增)</span>
+      </button>
+    </div>
+  </main>
+
+  <footer class="max-w-6xl w-full mx-auto mt-3 text-right text-[11px] text-slate-400">
+    時區基準：台北時間 (Asia/Taipei) ｜ 異動即時保存於本機儲存空間
+  </footer>
+
+  <script>
+    const STORAGE_KEY = 'CHIU_SOCIAL_INVENTORY_DATA_v1';
+
+    // 取得當前台北時間的 YYYY-MM-DD
+    function getTaipeiDate() {
+      const now = new Date();
+      return now.toLocaleDateString('zh-TW', {
+        timeZone: 'Asia/Taipei',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).replace(/\//g, '-');
+    }
+
+    // 初始預設教材資料
+    const defaultData = [
+      {
+        id: 1,
+        sku: 'SOC-JH1-01',
+        title: '國一社會臺灣史核心焦點',
+        baseStock: 48,
+        state: 'NONE',
+        qty: 0,
+        prevDate: '2026-09-01',
+        lastDate: '2026-09-18'
+      },
+      {
+        id: 2,
+        sku: 'SOC-JH2-01',
+        title: '國二社會中國史歷屆全圖解',
+        baseStock: 12,
+        state: 'OUT',
+        qty: 4,
+        prevDate: '2026-08-25',
+        lastDate: '2026-09-19'
+      },
+      {
+        id: 3,
+        sku: 'SOC-JH3-CAP',
+        title: '國三會考全科社會黃金素養模考本',
+        baseStock: 9,
+        state: 'NONE',
+        qty: 0,
+        prevDate: '2026-09-10',
+        lastDate: '2026-09-19'
+      }
+    ];
+
+    let inventory = [];
+
+    // 載入資料
+    function loadData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          inventory = JSON.parse(saved);
+        } catch (e) {
+          inventory = defaultData;
+        }
+      } else {
+        inventory = defaultData;
+      }
+    }
+
+    // 儲存資料
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
+    }
+
+    // 計算結餘數量
+    function calcFinalStock(item) {
+      const base = Number(item.baseStock) || 0;
+      const q = Number(item.qty) || 0;
+
+      if (item.state === 'IN') return base + q;
+      if (item.state === 'OUT') return Math.max(0, base - q);
+      return base;
+    }
+
+    // 渲染表格
+    function render() {
+      const tbody = document.getElementById('inventory-tbody');
+      tbody.innerHTML = '';
+
+      let alertCount = 0;
+
+      inventory.forEach((item, index) => {
+        const finalStock = calcFinalStock(item);
+        const isAlert = finalStock < 10;
+        if (isAlert) alertCount++;
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition-colors';
+
+        tr.innerHTML = `
+          <td class="p-2 text-center text-slate-400 font-mono">${index + 1}</td>
+          
+          <!-- 料號 -->
+          <td class="p-2">
+            <input type="text" value="${item.sku || ''}" placeholder="料號"
+                   onchange="updateItem(${item.id}, 'sku', this.value)"
+                   class="w-full bg-transparent font-mono font-bold text-slate-800 border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded px-1.5 py-1 outline-none">
+          </td>
+
+          <!-- 品名 -->
+          <td class="p-2">
+            <input type="text" value="${item.title || ''}" placeholder="教材名稱"
+                   onchange="updateItem(${item.id}, 'title', this.value)"
+                   class="w-full bg-transparent font-medium text-slate-900 border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded px-1.5 py-1 outline-none">
+          </td>
+
+          <!-- 目前在庫 -->
+          <td class="p-2 text-right">
+            <input type="number" min="0" value="${item.baseStock}"
+                   onchange="updateBaseStock(${item.id}, this.value)"
+                   class="w-18 text-right bg-transparent font-bold text-slate-700 num-font border border-transparent hover:border-slate-300 focus:border-indigo-500 rounded px-1 py-1 outline-none">
+          </td>
+
+          <!-- 狀態機：進 / 銷 / 無 -->
+          <td class="p-2 text-center">
+            <select onchange="updateState(${item.id}, this.value)"
+                    class="border rounded px-2 py-1 font-bold text-xs outline-none cursor-pointer ${
+                      item.state === 'IN' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' :
+                      item.state === 'OUT' ? 'bg-rose-50 border-rose-300 text-rose-800' :
+                      'bg-slate-100 border-slate-300 text-slate-600'
+                    }">
+              <option value="NONE" ${item.state === 'NONE' ? 'selected' : ''}>無 (維持)</option>
+              <option value="IN" ${item.state === 'IN' ? 'selected' : ''}>進 (加)</option>
+              <option value="OUT" ${item.state === 'OUT' ? 'selected' : ''}>銷 (出)</option>
+            </select>
+          </td>
+
+          <!-- 異動數量 -->
+          <td class="p-2 text-center">
+            <input type="number" min="0" value="${item.qty}"
+                   ${item.state === 'NONE' ? 'disabled' : ''}
+                   onchange="updateQty(${item.id}, this.value)"
+                   class="w-16 text-center border border-slate-300 rounded px-1 py-1 font-bold num-font outline-none ${item.state === 'NONE' ? '' : 'bg-white focus:border-indigo-500'}">
+          </td>
+
+          <!-- 結算數量 -->
+          <td class="p-2 text-right bg-slate-50 border-x border-slate-200">
+            <span class="font-black text-sm num-font ${isAlert ? 'text-rose-600 font-extrabold' : 'text-slate-900'}">
+              ${finalStock}
+            </span>
+          </td>
+
+          <!-- 前次更新時間 -->
+          <td class="p-2 text-center text-slate-400 font-mono text-[11px]">
+            ${item.prevDate || '-'}
+          </td>
+
+          <!-- 本次更新時間 -->
+          <td class="p-2 text-center font-mono text-[11px] font-bold text-indigo-700">
+            ${item.lastDate || '-'}
+          </td>
+
+          <!-- 狀態列：正常 (綠) / 要動作 (紅) -->
+          <td class="p-2 text-center">
+            ${isAlert ? `
+              <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-black bg-rose-100 text-rose-700 border border-rose-200">
+                要動作
+              </span>
+            ` : `
+              <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">
+                正常
+              </span>
+            `}
+          </td>
+
+          <!-- 操作：刪除 -->
+          <td class="p-2 text-center">
+            <button onclick="deleteRow(${item.id})" class="text-slate-400 hover:text-rose-600 p-1 rounded transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      // 更新頂部統計數據
+      document.getElementById('stat-total-items').textContent = inventory.length;
+      document.getElementById('stat-alert-items').textContent = alertCount;
+
+      lucide.createIcons();
+    }
+
+    // 處理日期更新記錄
+    function touchDate(item) {
+      const today = getTaipeiDate();
+      if (item.lastDate !== today) {
+        item.prevDate = item.lastDate || today;
+        item.lastDate = today;
+      }
+    }
+
+    // 切換狀態（進/銷/無）
+    function updateState(id, newState) {
+      const item = inventory.find(r => r.id === id);
+      if (item) {
+        touchDate(item);
+        item.state = newState;
+        if (newState === 'NONE') {
+          item.qty = 0;
+        }
+        saveData();
+        render();
+      }
+    }
+
+    // 更新數量
+    function updateQty(id, val) {
+      const item = inventory.find(r => r.id === id);
+      if (item) {
+        touchDate(item);
+        item.qty = Math.max(0, parseInt(val) || 0);
+        saveData();
+        render();
+      }
+    }
+
+    // 更新基準庫存
+    function updateBaseStock(id, val) {
+      const item = inventory.find(r => r.id === id);
+      if (item) {
+        touchDate(item);
+        item.baseStock = Math.max(0, parseInt(val) || 0);
+        saveData();
+        render();
+      }
+    }
+
+    // 更新欄位文字（料號、品名）
+    function updateItem(id, field, val) {
+      const item = inventory.find(r => r.id === id);
+      if (item) {
+        touchDate(item);
+        item[field] = val;
+        saveData();
+      }
+    }
+
+    // 底部按鈕：新增全新教材列
+    function addNewItemRow() {
+      const today = getTaipeiDate();
+      const newItem = {
+        id: Date.now(),
+        sku: 'SOC-NEW-' + String(inventory.length + 1).padStart(2, '0'),
+        title: '新教材名稱 (點擊編輯)',
+        baseStock: 50,
+        state: 'NONE',
+        qty: 0,
+        prevDate: today,
+        lastDate: today
+      };
+
+      inventory.push(newItem);
+      saveData();
+      render();
+    }
+
+    // 刪除列
+    function deleteRow(id) {
+      if (confirm('確定要移除此本教材紀錄嗎？')) {
+        inventory = inventory.filter(r => r.id !== id);
+        saveData();
+        render();
+      }
+    }
+
+    // 頁面初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      render();
+    });
+  </script>
 </body>
 </html>
