@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>智友文教 ｜ 邱小民社會教學團隊 薪資差勤與鐘點報酬結算系統 (Auth 版)</title>
+  <title>智友文教 ｜ 邱小民社會教學團隊 財務與差勤系統</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -12,133 +12,133 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    body { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif; }
-    .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    body { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; letter-spacing: 0.01em; }
+    .glass-card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     input:disabled, select:disabled, textarea:disabled, button:disabled { background-color: #f8fafc !important; color: #94a3b8 !important; border-color: #e2e8f0 !important; cursor: not-allowed !important; }
-    .table-input { transition: border-color 0.15s ease-in-out; }
-    .table-input:focus { background-color: #ffffff !important; border-color: #6366f1 !important; outline: none; }
+    .table-input { transition: all 0.15s ease-in-out; }
+    .table-input:focus { background-color: #ffffff !important; border-color: #6366f1 !important; box-shadow: 0 0 0 1px #6366f1; outline: none; }
     .num-font { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+    
+    /* 專業版頁籤樣式 */
+    .tab-btn { transition: all 0.2s ease; border-bottom: 2px solid transparent; }
+    .tab-btn.active { color: #4338ca; border-bottom-color: #4338ca; font-weight: 700; background-color: #eef2ff; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
 
   <!-- 1. 登入畫面 -->
   <div id="auth-screen" class="hidden flex-1 flex items-center justify-center">
-    <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 text-center max-w-sm w-full">
-      <div class="h-12 w-12 bg-amber-600 text-white rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md">
-        <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+    <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center max-w-sm w-full">
+      <div class="h-12 w-12 bg-slate-900 text-white rounded-lg flex items-center justify-center mx-auto mb-5 shadow-sm">
+        <i data-lucide="calculator" class="w-6 h-6"></i>
       </div>
-      <h2 class="text-xl font-bold mb-2">財務與差勤系統</h2>
-      <p class="text-sm text-slate-500 mb-6">請使用團隊 Google 帳號進行登入</p>
-      <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-2 bg-[#1d1d1f] text-white py-2.5 rounded-xl font-medium hover:bg-black transition-colors">
-        <i data-lucide="log-in" class="w-4 h-4"></i> 以 Google 帳號登入
+      <h2 class="text-xl font-bold mb-2">財務與差勤結算系統</h2>
+      <p class="text-sm text-slate-500 mb-6">請使用已授權的 Google 帳號登入</p>
+      <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors">
+        <i data-lucide="log-in" class="w-4 h-4"></i> 進行驗證登入
       </button>
     </div>
   </div>
 
   <!-- 2. 待審核畫面 -->
   <div id="pending-screen" class="hidden flex-1 flex items-center justify-center">
-    <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 text-center max-w-sm w-full">
-      <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
-        <i data-lucide="clock" class="w-6 h-6"></i>
+    <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center max-w-sm w-full">
+      <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-100">
+        <i data-lucide="shield-alert" class="w-5 h-5"></i>
       </div>
-      <h2 class="text-xl font-bold mb-2">權限待審核</h2>
-      <p class="text-sm text-slate-500 mb-6">您的帳號已記錄。請聯繫管理員 (admin) 為您開通財務系統使用權限。</p>
+      <h2 class="text-lg font-bold mb-2">權限待開通</h2>
+      <p class="text-sm text-slate-500 mb-6">您的帳號已記錄。請聯繫管理員為您開通本系統的使用權限。</p>
       <button onclick="logout()" class="text-sm text-indigo-600 font-medium hover:underline">登出切換帳號</button>
     </div>
   </div>
 
   <!-- 3. 主系統容器 -->
   <div id="app-container" class="hidden flex-col flex-1">
-    <!-- 頂部全域導覽列 -->
-    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-xs px-3 sm:px-4 py-2">
-      <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-2.5">
+    
+    <!-- 頂部導覽列 -->
+    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 px-4 py-2.5 shadow-sm">
+      <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-3">
         
-        <div class="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start flex-wrap">
-          <div class="flex items-center gap-2">
-            <div class="h-8 w-8 bg-amber-600 text-white rounded-lg flex items-center justify-center font-black shadow-xs">
-              <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+        <div class="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start flex-wrap">
+          <div class="flex items-center gap-2.5">
+            <div class="h-7 w-7 bg-slate-800 text-white rounded flex items-center justify-center font-black">
+              <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
             </div>
-            <div class="flex items-center gap-2">
-              <h1 class="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight">邱小民社會教學團隊</h1>
-              <span class="text-[11px] bg-amber-100 text-amber-900 font-bold px-1.5 py-0.2 rounded">115年報酬結算</span>
+            <div>
+              <h1 class="font-bold text-sm text-slate-900 tracking-tight leading-tight">邱小民社會教學團隊</h1>
+              <div class="text-[10px] text-slate-500 font-medium">財務與差勤結算系統</div>
             </div>
           </div>
 
-          <div class="flex items-center gap-1.5">
-            <div class="flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-lg">
-              <span class="text-xs font-bold text-indigo-900 whitespace-nowrap">核定時薪：</span>
+          <!-- 薪資設定 -->
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md">
+              <span class="text-[11px] font-semibold text-slate-600">核定時薪</span>
               <div class="flex items-center gap-0.5">
-                <span class="text-xs font-bold text-indigo-700">$</span>
-                <input type="number" id="globalHourlyRate" value="660" step="10" min="0" disabled onchange="updateGlobalHourlyRate(this.value)" class="w-16 bg-white border border-indigo-300 rounded px-1.5 py-0.5 text-xs font-black text-indigo-950 text-right num-font focus:ring-1 focus:ring-indigo-500">
-                <span class="text-[11px] text-indigo-600 font-semibold">/h</span>
+                <span class="text-[11px] font-bold text-slate-400">$</span>
+                <input type="number" id="globalHourlyRate" value="660" step="10" min="0" disabled onchange="updateGlobalHourlyRate(this.value)" class="w-16 bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs font-bold text-slate-900 text-right num-font focus:border-indigo-500 transition-colors">
               </div>
             </div>
-            <div class="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-lg">
-              <span class="text-xs font-bold text-rose-900 whitespace-nowrap">固定月薪：</span>
+            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md">
+              <span class="text-[11px] font-semibold text-slate-600">固定月薪</span>
               <div class="flex items-center gap-0.5">
-                <span class="text-xs font-bold text-rose-700">$</span>
-                <input type="number" id="globalMonthlySalary" value="0" step="1000" min="0" disabled onchange="updateGlobalMonthlySalary(this.value)" class="w-20 bg-white border border-rose-300 rounded px-1.5 py-0.5 text-xs font-black text-rose-950 text-right num-font focus:ring-1 focus:ring-rose-500">
+                <span class="text-[11px] font-bold text-slate-400">$</span>
+                <input type="number" id="globalMonthlySalary" value="0" step="1000" min="0" disabled onchange="updateGlobalMonthlySalary(this.value)" class="w-20 bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs font-bold text-slate-900 text-right num-font focus:border-indigo-500 transition-colors">
               </div>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 w-full lg:w-auto justify-between lg:justify-end flex-wrap sm:flex-nowrap">
+        <div class="flex items-center gap-2.5 w-full lg:w-auto justify-between lg:justify-end flex-wrap sm:flex-nowrap">
           
-          <div class="flex items-center gap-2 bg-slate-100/70 border border-slate-200 px-2 py-1 rounded-md text-xs">
-            <span id="current-user-name" class="font-bold text-slate-800">載入中...</span>
-            <span id="current-user-role" class="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded font-bold uppercase">ROLE</span>
+          <div class="flex items-center gap-2 bg-indigo-50 text-indigo-900 border border-indigo-100 px-2.5 py-1 rounded-md text-xs">
+            <span id="current-user-name" class="font-bold">載入中...</span>
+            <span id="current-user-role" class="text-[9px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">ROLE</span>
           </div>
 
-          <div class="flex items-center gap-1 bg-white border border-slate-300 px-2 py-1 rounded-md shadow-2xs">
-            <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-600"></i>
-            <select id="monthFilter" onchange="onMonthChange(this.value)" class="bg-transparent border-0 text-slate-900 text-xs font-black cursor-pointer focus:ring-0">
-              <option value="2026-08">115年8月 (2026-08)</option>
-              <option value="2026-09">115年9月 (2026-09)</option>
-              <option value="2026-10">115年10月 (2026-10)</option>
+          <div class="flex items-center gap-1.5 bg-white border border-slate-300 px-2.5 py-1 rounded-md shadow-sm">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+            <select id="monthFilter" onchange="onMonthChange(this.value)" class="bg-transparent border-0 text-slate-800 text-xs font-bold cursor-pointer focus:ring-0 p-0">
+              <!-- JS 動態生成 -->
             </select>
           </div>
 
-          <button id="btnMonthLock" onclick="toggleMonthLock()" class="hidden items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-md transition-all border shadow-2xs">
+          <button id="btnMonthLock" onclick="toggleMonthLock()" class="hidden items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-md transition-all border shadow-sm">
             <i id="iconMonthLock" data-lucide="lock-open" class="w-3.5 h-3.5"></i>
             <span id="textMonthLock">編輯中</span>
           </button>
 
-          <div id="saveStatusIndicator" class="flex items-center gap-1 text-xs text-emerald-600 font-medium px-2 py-1 bg-emerald-50 rounded-md border border-emerald-200/60">
-            <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
-            <span id="saveStatusText">已存檔</span>
+          <div id="saveStatusIndicator" class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium px-2 py-1">
+            <i data-lucide="cloud-off" class="w-3.5 h-3.5"></i>
+            <span id="saveStatusText">就緒</span>
           </div>
 
-          <!-- 管理員專用：切換檢視人員 -->
-          <div id="adminUserSwitchBox" class="hidden items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md transition-all">
-            <label for="teacherSelect" class="text-xs font-bold text-amber-900 whitespace-nowrap flex items-center gap-1">
-              <i data-lucide="users" class="w-3.5 h-3.5 text-amber-600"></i>
-              <span>檢視：</span>
-            </label>
-            <select id="teacherSelect" onchange="onSelectTeacher(this.value)" class="bg-white border border-amber-300 text-slate-900 text-xs font-bold rounded px-2 py-0.5 focus:ring-1 focus:ring-amber-500 cursor-pointer w-32 truncate"></select>
+          <div id="adminUserSwitchBox" class="hidden items-center gap-1.5 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md">
+            <i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i>
+            <select id="teacherSelect" onchange="onSelectTeacher(this.value)" class="bg-transparent text-slate-800 text-xs font-bold focus:outline-none cursor-pointer w-32 truncate"></select>
           </div>
 
-          <button id="btn-admin-panel" onclick="toggleAdminPanel()" class="hidden px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100">
-            審核管理
+          <button id="btn-admin-panel" onclick="toggleAdminPanel()" class="hidden px-3 py-1 rounded-md text-xs font-bold bg-slate-800 text-white hover:bg-slate-700 transition-colors">
+            權限管理
           </button>
-
-          <button onclick="logout()" class="px-2.5 py-1 rounded-md text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100">登出</button>
-
+          
+          <button onclick="logout()" class="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="登出">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
         </div>
       </div>
     </header>
 
     <!-- 隱藏：身分審核管理面板 (Admin Only) -->
-    <div id="admin-panel" class="hidden bg-white border-b border-slate-200 p-4 shadow-sm z-40 relative">
-      <h2 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i> 財務系統權限管理</h2>
+    <div id="admin-panel" class="hidden bg-white border-b border-slate-200 p-5 shadow-sm z-40 relative">
+      <h2 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-slate-600"></i> 財務系統權限管理</h2>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse max-w-3xl">
           <thead>
-            <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 text-center">
+            <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-center font-semibold">
               <th class="p-2 w-1/4">姓名</th>
               <th class="p-2 w-1/3">信箱</th>
               <th class="p-2 w-1/4">當前身分</th>
@@ -151,196 +151,218 @@
     </div>
 
     <!-- 視圖切換標籤 -->
-    <div class="w-full px-3 pt-3 flex items-center gap-2 overflow-x-auto">
-      <button onclick="switchView('teaching')" id="tab-teaching" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-xs bg-white text-indigo-700 border-t border-x border-slate-200 shadow-[0_-2px_4px_rgba(0,0,0,0.02)]">📚 授課與核銷</button>
-      <button onclick="switchView('overtime')" id="tab-overtime" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-xs bg-slate-100 text-slate-500 hover:bg-slate-50">⏱️ 加班回報</button>
-      <button onclick="switchView('leave')" id="tab-leave" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-xs bg-slate-100 text-slate-500 hover:bg-slate-50">🏖️ 請假差勤</button>
-      <button onclick="switchView('salary')" id="tab-salary" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-xs bg-slate-100 text-slate-500 hover:bg-slate-50">💰 薪資結算總表</button>
+    <div class="w-full px-4 pt-4 flex items-center gap-1 border-b border-slate-200 bg-white">
+      <button onclick="switchView('teaching')" id="tab-teaching" class="tab-btn active px-4 py-2.5 text-xs text-slate-500 hover:text-slate-800 rounded-t-md">授課與核銷</button>
+      <button onclick="switchView('overtime')" id="tab-overtime" class="tab-btn px-4 py-2.5 text-xs text-slate-500 hover:text-slate-800 rounded-t-md">加班回報</button>
+      <button onclick="switchView('leave')" id="tab-leave" class="tab-btn px-4 py-2.5 text-xs text-slate-500 hover:text-slate-800 rounded-t-md">請假差勤</button>
+      <button onclick="switchView('salary')" id="tab-salary" class="tab-btn px-4 py-2.5 text-xs text-slate-500 hover:text-slate-800 rounded-t-md">薪資結算總表</button>
     </div>
 
-    <main class="w-full px-2 sm:px-3 py-2.5 flex-1 space-y-2.5">
+    <!-- 主工作區 -->
+    <main class="w-full px-4 py-4 flex-1 space-y-4">
+      
       <!-- 視圖 1: 授課鐘點回報 -->
-      <section id="view-teaching" class="view-panel space-y-2">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500">本月授課堂數</span>
-            <span id="stat-teaching-classes" class="text-sm font-black text-slate-800 num-font">0 堂</span>
+      <section id="view-teaching" class="view-panel space-y-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col">
+            <span class="text-[11px] font-medium text-slate-500">本月授課堂數</span>
+            <span id="stat-teaching-classes" class="text-lg font-bold text-slate-800 num-font mt-1">0</span>
           </div>
-          <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-500">核定時數</span>
-            <span id="stat-teaching-approved-hours" class="text-sm font-black text-slate-800 num-font">0.0 h</span>
+          <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col">
+            <span class="text-[11px] font-medium text-slate-500">核定時數</span>
+            <span id="stat-teaching-approved-hours" class="text-lg font-bold text-slate-800 num-font mt-1">0.0 h</span>
           </div>
-          <div class="bg-indigo-50/50 px-3 py-1.5 rounded-lg border border-indigo-100 shadow-2xs flex items-center justify-between">
-            <span class="text-xs font-semibold text-indigo-800">授課薪資小計</span>
-            <span id="stat-teaching-total-pay" class="text-sm font-black text-indigo-700 num-font">$ 0</span>
+          <div class="bg-indigo-50/50 p-3 rounded-lg border border-indigo-100 shadow-sm flex flex-col">
+            <span class="text-[11px] font-medium text-indigo-700">授課薪資小計</span>
+            <span id="stat-teaching-total-pay" class="text-lg font-bold text-indigo-900 num-font mt-1">$ 0</span>
           </div>
-          <div class="bg-emerald-50/50 px-3 py-1.5 rounded-lg border border-emerald-100 shadow-2xs flex items-center justify-between">
-            <span class="text-xs font-semibold text-emerald-800">核准差旅墊付額</span>
-            <span id="stat-expense-approved-total" class="text-sm font-black text-emerald-700 num-font">$ 0</span>
+          <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100 shadow-sm flex flex-col">
+            <span class="text-[11px] font-medium text-emerald-700">核准差旅墊付額</span>
+            <span id="stat-expense-approved-total" class="text-lg font-bold text-emerald-900 num-font mt-1">$ 0</span>
           </div>
         </div>
 
-        <div id="teaching-export-card" class="glass-card p-2.5 sm:p-3 rounded-xl w-full relative">
-          <div id="stampLockedTeaching" class="hidden absolute top-3 right-36 border-2 border-rose-600 text-rose-600 font-black text-xs px-2.5 py-0.5 rounded uppercase rotate-[-6deg]">🔒 已結算封存</div>
-          <div class="w-full overflow-x-auto mt-2">
+        <div id="teaching-export-card" class="glass-card p-4 rounded-xl w-full relative">
+          <div id="stampLockedTeaching" class="hidden absolute top-4 right-10 border-2 border-slate-800 text-slate-800 font-black text-[10px] px-2 py-0.5 rounded tracking-widest uppercase opacity-70">結算封存</div>
+          <div class="w-full overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse table-fixed min-w-[900px]">
               <thead>
-                <tr class="bg-slate-100 text-slate-700 font-bold border-y border-slate-200 text-center">
-                  <th rowspan="2" style="width: 35px;" class="p-1">序</th>
-                  <th rowspan="2" style="width: 115px;" class="p-1 text-left">上課日期</th>
-                  <th colspan="3" class="p-1 bg-slate-200/60 text-slate-800 border-x border-slate-200">📚 授課事實</th>
-                  <th colspan="2" class="p-1 bg-indigo-50 text-indigo-950 border-r border-indigo-100">💼 鐘點審核</th>
-                  <th colspan="3" class="p-1 bg-amber-50 text-amber-950 border-r border-amber-200">🚗 代墊費用核銷</th>
-                  <th rowspan="2" style="width: 35px;" class="p-1 row-action-cell">操作</th>
+                <tr class="bg-slate-50 text-slate-600 font-semibold border-y border-slate-200 text-center">
+                  <th rowspan="2" style="width: 40px;" class="p-2 border-r border-slate-200">序</th>
+                  <th rowspan="2" style="width: 120px;" class="p-2 text-left border-r border-slate-200">日期</th>
+                  <th colspan="3" class="p-2 border-r border-slate-200">授課事實</th>
+                  <th colspan="2" class="p-2 border-r border-slate-200">鐘點審核</th>
+                  <th colspan="3" class="p-2 border-r border-slate-200">代墊核銷</th>
+                  <th rowspan="2" style="width: 40px;" class="p-2 row-action-cell"></th>
                 </tr>
-                <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 text-[11px]">
-                  <th style="width: 25%;" class="p-1 border-l border-slate-200 text-left">分校地點 / 班別</th>
-                  <th style="width: 130px;" class="p-1 text-center">起訖時間</th>
-                  <th style="width: 35%;" class="p-1 border-r border-slate-200 text-left">教學進度 / 備註</th>
-                  <th style="width: 55px;" class="p-1 text-center bg-indigo-50/70">核定h</th>
-                  <th style="width: 75px;" class="p-1 text-right bg-indigo-50/70 border-r border-indigo-100 pr-2">小計</th>
-                  <th style="width: 22%;" class="p-1 bg-amber-50/70 text-left">名目</th>
-                  <th style="width: 70px;" class="p-1 text-right bg-amber-50/70 pr-1">金額</th>
-                  <th style="width: 45px;" class="p-1 text-center bg-amber-50/70 border-r border-amber-200">核可</th>
+                <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 text-[11px]">
+                  <th style="width: 25%;" class="p-2 text-left border-r border-slate-200">專案/班別</th>
+                  <th style="width: 130px;" class="p-2 text-center border-r border-slate-200">起訖時間</th>
+                  <th style="width: 35%;" class="p-2 text-left border-r border-slate-200">進度/備註</th>
+                  <th style="width: 60px;" class="p-2 text-center border-r border-slate-200">核定h</th>
+                  <th style="width: 80px;" class="p-2 text-right border-r border-slate-200 pr-3">小計</th>
+                  <th style="width: 22%;" class="p-2 text-left border-r border-slate-200">名目</th>
+                  <th style="width: 70px;" class="p-2 text-right border-r border-slate-200">金額</th>
+                  <th style="width: 50px;" class="p-2 text-center border-r border-slate-200">核准</th>
                 </tr>
               </thead>
-              <tbody id="teaching-tbody" class="divide-y divide-slate-200"></tbody>
+              <tbody id="teaching-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
-          <div id="boxAddTeaching" class="mt-2 pt-1.5 border-t border-slate-200 flex justify-center">
-            <button onclick="addTeachingRow()" class="w-full text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-dashed border-indigo-300 py-1.5 rounded-lg transition flex items-center justify-center gap-1"><i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> 新增授課紀錄</button>
+          <div id="boxAddTeaching" class="mt-3 flex justify-center">
+            <button onclick="addTeachingRow()" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-1.5 rounded transition-colors flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增紀錄
+            </button>
           </div>
         </div>
       </section>
 
       <!-- 視圖 2: 加班工時申報 -->
-      <section id="view-overtime" class="view-panel space-y-2 hidden">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs flex justify-between"><span class="text-xs font-semibold text-slate-500">當月申報時數</span><span id="stat-ot-claimed-hours" class="text-sm font-black text-slate-800">0.0 h</span></div>
-          <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs flex justify-between"><span class="text-xs font-semibold text-indigo-600">主管核准時數</span><span id="stat-ot-approved-hours" class="text-sm font-black text-indigo-600">0.0 h</span></div>
-          <div class="bg-emerald-50/50 px-3 py-1.5 rounded-lg border border-emerald-100 shadow-2xs flex justify-between"><span class="text-xs font-semibold text-emerald-800">核定加班費</span><span id="stat-ot-total-pay" class="text-sm font-black text-emerald-700">$ 0</span></div>
+      <section id="view-overtime" class="view-panel space-y-3 hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col"><span class="text-[11px] font-medium text-slate-500">申報時數</span><span id="stat-ot-claimed-hours" class="text-lg font-bold text-slate-800 num-font mt-1">0.0 h</span></div>
+          <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col"><span class="text-[11px] font-medium text-indigo-600">核准時數</span><span id="stat-ot-approved-hours" class="text-lg font-bold text-indigo-900 num-font mt-1">0.0 h</span></div>
+          <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100 shadow-sm flex flex-col"><span class="text-[11px] font-medium text-emerald-700">核定加班費</span><span id="stat-ot-total-pay" class="text-lg font-bold text-emerald-900 num-font mt-1">$ 0</span></div>
         </div>
-        <div id="overtime-export-card" class="glass-card p-2.5 sm:p-3 rounded-xl w-full">
-          <div id="stampLockedOvertime" class="hidden absolute top-3 right-36 border-2 border-rose-600 text-rose-600 font-black text-xs px-2.5 py-0.5 rounded uppercase rotate-[-6deg]">🔒 已結算封存</div>
-          <div class="w-full overflow-x-auto mt-2">
+        <div id="overtime-export-card" class="glass-card p-4 rounded-xl w-full relative">
+          <div id="stampLockedOvertime" class="hidden absolute top-4 right-10 border-2 border-slate-800 text-slate-800 font-black text-[10px] px-2 py-0.5 rounded uppercase opacity-70">結算封存</div>
+          <div class="w-full overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse table-fixed min-w-[800px]">
               <thead>
-                <tr class="bg-slate-100 text-slate-700 font-bold border-y border-slate-200 text-center">
-                  <th style="width: 35px;" class="p-1">序</th>
-                  <th style="width: 115px;" class="p-1 text-left">加班日期</th>
-                  <th style="width: 130px;" class="p-1 bg-amber-50/70 text-amber-950 font-bold">起訖時段</th>
-                  <th style="width: auto;" class="p-1 text-left">專案任務 / 加班事由說明</th>
-                  <th style="width: 55px;" class="p-1 bg-indigo-50/80">核准h</th>
-                  <th style="width: 65px;" class="p-1 bg-indigo-50/80">時薪</th>
-                  <th style="width: 65px;" class="p-1 bg-indigo-50/80">倍率</th>
-                  <th style="width: 55px;" class="p-1 bg-emerald-50 border-x border-emerald-200">核可</th>
-                  <th style="width: 80px;" class="p-1 text-right bg-indigo-50/80 pr-2">加班費</th>
-                  <th style="width: 35px;" class="p-1 row-action-cell">操作</th>
+                <tr class="bg-slate-50 text-slate-600 font-semibold border-y border-slate-200 text-center">
+                  <th style="width: 40px;" class="p-2 border-r border-slate-200">序</th>
+                  <th style="width: 120px;" class="p-2 text-left border-r border-slate-200">日期</th>
+                  <th style="width: 130px;" class="p-2 border-r border-slate-200">起訖時段</th>
+                  <th style="width: auto;" class="p-2 text-left border-r border-slate-200">專案/事由</th>
+                  <th style="width: 60px;" class="p-2 border-r border-slate-200">核准h</th>
+                  <th style="width: 70px;" class="p-2 border-r border-slate-200">時薪</th>
+                  <th style="width: 70px;" class="p-2 border-r border-slate-200">倍率</th>
+                  <th style="width: 50px;" class="p-2 border-r border-slate-200">核准</th>
+                  <th style="width: 90px;" class="p-2 text-right border-r border-slate-200 pr-3">總計</th>
+                  <th style="width: 40px;" class="p-2 row-action-cell"></th>
                 </tr>
               </thead>
-              <tbody id="overtime-tbody" class="divide-y divide-slate-200"></tbody>
+              <tbody id="overtime-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
-          <div id="boxAddOvertime" class="mt-2 pt-1.5 border-t border-slate-200 flex justify-center">
-            <button onclick="addOvertimeRow()" class="w-full text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-dashed border-indigo-300 py-1.5 rounded-lg transition flex justify-center gap-1"><i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> 新增加班紀錄</button>
+          <div id="boxAddOvertime" class="mt-3 flex justify-center">
+            <button onclick="addOvertimeRow()" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-1.5 rounded transition-colors flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增紀錄
+            </button>
           </div>
         </div>
       </section>
 
       <!-- 視圖 3: 請假差勤回報 -->
-      <section id="view-leave" class="view-panel space-y-2 hidden">
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
-          <div class="bg-white px-2 py-1.5 rounded-lg border border-slate-200 flex flex-col items-center"><span class="text-[11px] font-bold text-slate-500">排休</span><span id="stat-leave-paixiu" class="text-sm font-black text-emerald-600">0 天</span></div>
-          <div class="bg-white px-2 py-1.5 rounded-lg border border-slate-200 flex flex-col items-center"><span class="text-[11px] font-bold text-slate-500">特休</span><span id="stat-leave-texiu" class="text-sm font-black text-emerald-600">0 天</span></div>
-          <div class="bg-white px-2 py-1.5 rounded-lg border border-slate-200 flex flex-col items-center"><span class="text-[11px] font-bold text-slate-500">事假</span><span id="stat-leave-shijia" class="text-sm font-black text-rose-600">0 天</span></div>
-          <div class="bg-white px-2 py-1.5 rounded-lg border border-slate-200 flex flex-col items-center"><span class="text-[11px] font-bold text-slate-500">病假</span><span id="stat-leave-bingjia" class="text-sm font-black text-amber-600">0 天</span></div>
-          <div class="bg-rose-50 px-2 py-1.5 rounded-lg border border-rose-200 flex flex-col items-center col-span-2 md:col-span-1"><span class="text-[11px] font-bold text-rose-800">本月核定扣除額</span><span id="stat-leave-total-deduct" class="text-sm font-black text-rose-700">-$ 0</span></div>
+      <section id="view-leave" class="view-panel space-y-3 hidden">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex flex-col items-center"><span class="text-[10px] font-medium text-slate-500 uppercase">排休</span><span id="stat-leave-paixiu" class="text-base font-bold text-slate-800 mt-0.5">0 天</span></div>
+          <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex flex-col items-center"><span class="text-[10px] font-medium text-slate-500 uppercase">特休</span><span id="stat-leave-texiu" class="text-base font-bold text-slate-800 mt-0.5">0 天</span></div>
+          <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex flex-col items-center"><span class="text-[10px] font-medium text-slate-500 uppercase">事假</span><span id="stat-leave-shijia" class="text-base font-bold text-rose-600 mt-0.5">0 天</span></div>
+          <div class="bg-white p-2.5 rounded-lg border border-slate-200 flex flex-col items-center"><span class="text-[10px] font-medium text-slate-500 uppercase">病假</span><span id="stat-leave-bingjia" class="text-base font-bold text-amber-600 mt-0.5">0 天</span></div>
+          <div class="bg-rose-50/50 p-2.5 rounded-lg border border-rose-100 flex flex-col items-center col-span-2 md:col-span-1"><span class="text-[10px] font-medium text-rose-700 uppercase">核定扣除額</span><span id="stat-leave-total-deduct" class="text-base font-bold text-rose-700 mt-0.5">-$ 0</span></div>
         </div>
-        <div id="leave-export-card" class="glass-card p-2.5 sm:p-3 rounded-xl w-full">
-          <div id="stampLockedLeave" class="hidden absolute top-3 right-36 border-2 border-rose-600 text-rose-600 font-black text-xs px-2.5 py-0.5 rounded uppercase rotate-[-6deg]">🔒 已結算封存</div>
-          <div class="w-full overflow-x-auto mt-2">
+        <div id="leave-export-card" class="glass-card p-4 rounded-xl w-full relative">
+          <div id="stampLockedLeave" class="hidden absolute top-4 right-10 border-2 border-slate-800 text-slate-800 font-black text-[10px] px-2 py-0.5 rounded uppercase opacity-70">結算封存</div>
+          <div class="w-full overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse table-fixed min-w-[850px]">
               <thead>
-                <tr class="bg-slate-100 text-slate-700 font-bold border-y border-slate-200 text-center">
-                  <th style="width: 35px;" class="p-1">序</th>
-                  <th style="width: 115px;" class="p-1 text-left">請假日期</th>
-                  <th style="width: 75px;" class="p-1 bg-amber-50/70">假別</th>
-                  <th style="width: 140px;" class="p-1 bg-amber-50/70">長度</th>
-                  <th style="width: auto;" class="p-1 text-left">事由說明</th>
-                  <th style="width: 75px;" class="p-1 bg-indigo-50/80">日薪基準</th>
-                  <th style="width: 80px;" class="p-1 bg-indigo-50/80">扣薪比例</th>
-                  <th style="width: 80px;" class="p-1 text-right bg-indigo-50/80 pr-2">扣款小計</th>
-                  <th style="width: 35px;" class="p-1 row-action-cell">操作</th>
+                <tr class="bg-slate-50 text-slate-600 font-semibold border-y border-slate-200 text-center">
+                  <th style="width: 40px;" class="p-2 border-r border-slate-200">序</th>
+                  <th style="width: 120px;" class="p-2 text-left border-r border-slate-200">日期</th>
+                  <th style="width: 80px;" class="p-2 border-r border-slate-200">假別</th>
+                  <th style="width: 130px;" class="p-2 border-r border-slate-200">長度</th>
+                  <th style="width: auto;" class="p-2 text-left border-r border-slate-200">事由說明</th>
+                  <th style="width: 80px;" class="p-2 border-r border-slate-200">日薪基準</th>
+                  <th style="width: 80px;" class="p-2 border-r border-slate-200">扣薪比例</th>
+                  <th style="width: 90px;" class="p-2 text-right border-r border-slate-200 pr-3">小計</th>
+                  <th style="width: 40px;" class="p-2 row-action-cell"></th>
                 </tr>
               </thead>
-              <tbody id="leave-tbody" class="divide-y divide-slate-200"></tbody>
+              <tbody id="leave-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
-          <div id="boxAddLeave" class="mt-2 pt-1.5 border-t border-slate-200 flex justify-center">
-            <button onclick="addLeaveRow()" class="w-full text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-dashed border-indigo-300 py-1.5 rounded-lg transition flex justify-center gap-1"><i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> 新增請假紀錄</button>
+          <div id="boxAddLeave" class="mt-3 flex justify-center">
+            <button onclick="addLeaveRow()" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-1.5 rounded transition-colors flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增紀錄
+            </button>
           </div>
         </div>
       </section>
 
       <!-- 視圖 4: 薪資結算總明細 -->
-      <section id="view-salary" class="view-panel space-y-2 hidden">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <div class="bg-gradient-to-r from-amber-600 to-amber-700 p-2.5 rounded-lg text-white shadow-xs flex items-center justify-between">
-            <div><div class="text-[10px] font-bold uppercase text-amber-100">本期實領薪資</div><div class="text-xl sm:text-2xl font-black num-font mt-0.5" id="dash-net-pay">$ 0</div></div>
+      <section id="view-salary" class="view-panel space-y-3 hidden">
+        
+        <!-- 卡片匯總區 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="bg-slate-800 p-4 rounded-xl text-white shadow-sm flex flex-col justify-center">
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">本期實領薪資淨額</div>
+            <div class="text-3xl font-bold num-font mt-1 text-white" id="dash-net-pay">$ 0</div>
           </div>
-          <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-2xs flex flex-col justify-between">
-            <div class="flex items-center justify-between text-xs"><span class="font-bold text-indigo-700">出勤與代墊結算</span><span class="text-sm font-black text-slate-900" id="dash-auto-subtotal">$ 0</span></div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">基本出勤與核銷</div>
+            <div class="text-xl font-bold text-slate-800 num-font mt-1" id="dash-auto-subtotal">$ 0</div>
           </div>
-          <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-2xs flex flex-col justify-between">
-            <div class="flex items-center justify-between text-xs"><span class="font-bold text-amber-800">自由會計帳 (加給/代扣)</span><span class="text-sm font-black text-slate-900" id="dash-boss-subtotal">+$ 0</span></div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">會計項目調整 (加/扣)</div>
+            <div class="text-xl font-bold text-slate-800 num-font mt-1" id="dash-boss-subtotal">+$ 0</div>
           </div>
         </div>
 
-        <div id="salary-export-card" class="glass-card p-3 sm:p-4 rounded-xl border border-slate-200 w-full relative">
-          <div id="stampLockedSalary" class="hidden absolute top-4 right-44 border-2 border-rose-600 text-rose-600 font-black text-xs px-3 py-1 rounded uppercase rotate-[-6deg]">🔒 已結算封存</div>
-          <div class="border-b-2 border-slate-900 pb-1.5 mb-2 flex justify-between items-end">
+        <div id="salary-export-card" class="glass-card p-5 sm:p-6 rounded-xl w-full relative bg-white">
+          <div id="stampLockedSalary" class="hidden absolute top-6 right-12 border-2 border-slate-800 text-slate-800 font-black text-xs px-2 py-1 rounded uppercase opacity-70">已結算封存</div>
+          
+          <div class="border-b border-slate-300 pb-3 mb-4 flex justify-between items-end">
             <div>
-              <div class="text-[11px] font-extrabold text-amber-700">智友文教事業有限公司 ｜ 邱小民社會教學團隊</div>
-              <h2 class="text-base sm:text-lg font-black text-slate-900">工作報酬明細單</h2>
-              <div class="flex flex-wrap gap-x-3 text-xs text-slate-600 mt-0.5">
-                <span>姓名：<strong class="text-slate-900 report-user-name"></strong></span>
-                <span>職稱：<strong class="report-user-title"></strong></span>
-                <span>月份：<strong id="display-salary-month" class="text-amber-900 font-bold"></strong></span>
+              <div class="text-[11px] font-bold text-slate-500 mb-1">智友文教事業有限公司 ｜ 邱小民社會教學團隊</div>
+              <h2 class="text-lg font-bold text-slate-900 tracking-tight">工作報酬明細單</h2>
+              <div class="flex flex-wrap gap-x-4 text-xs text-slate-600 mt-2 font-medium">
+                <span>對象：<strong class="text-slate-900 report-user-name"></strong></span>
+                <span>職位：<strong class="text-slate-900 report-user-title"></strong></span>
+                <span>結算月份：<strong id="display-salary-month" class="text-slate-900"></strong></span>
               </div>
+            </div>
+            <button onclick="exportToPNG('salary-export-card', '工作報酬結算明細單')" class="text-[11px] font-medium text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors">
+              <i data-lucide="download" class="w-4 h-4"></i> 下載存檔
+            </button>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-xs font-bold text-slate-700 mb-2">一、系統出勤紀錄 (自動彙總)</div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+              <div class="bg-slate-50 p-2.5 rounded border border-slate-200 flex justify-between items-center"><span class="text-slate-600">授課薪資</span><strong class="text-slate-900" id="card-auto-teaching">$ 0</strong></div>
+              <div class="bg-slate-50 p-2.5 rounded border border-slate-200 flex justify-between items-center"><span class="text-slate-600">代墊核銷</span><strong class="text-slate-900" id="card-auto-expense">+$ 0</strong></div>
+              <div class="bg-slate-50 p-2.5 rounded border border-slate-200 flex justify-between items-center"><span class="text-slate-600">加班津貼</span><strong class="text-slate-900" id="card-auto-ot">+$ 0</strong></div>
+              <div class="bg-slate-50 p-2.5 rounded border border-slate-200 flex justify-between items-center"><span class="text-slate-600">差勤扣除</span><strong class="text-rose-600" id="card-auto-leave">-$ 0</strong></div>
             </div>
           </div>
 
-          <div class="mb-2.5 bg-slate-50 rounded-lg p-2 border border-slate-200">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-1.5 text-xs">
-              <div class="bg-white p-1.5 rounded border border-slate-200 flex justify-between"><span>授課薪資小計</span><strong id="card-auto-teaching">$ 0</strong></div>
-              <div class="bg-emerald-50/50 p-1.5 rounded border border-emerald-200 flex justify-between"><span class="text-emerald-800">代墊核銷款</span><strong class="text-emerald-700" id="card-auto-expense">+$ 0</strong></div>
-              <div class="bg-white p-1.5 rounded border border-slate-200 flex justify-between"><span>加班津貼</span><strong class="text-emerald-600" id="card-auto-ot">+$ 0</strong></div>
-              <div class="bg-white p-1.5 rounded border border-slate-200 flex justify-between"><span>差勤扣除</span><strong class="text-rose-600" id="card-auto-leave">-$ 0</strong></div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-2.5 mb-2.5">
-            <div class="border border-emerald-200 bg-emerald-50/20 rounded-lg p-2">
-              <div class="flex items-center justify-between pb-1 mb-1 border-b border-emerald-200 text-xs">
-                <span class="font-black text-emerald-950">主管加給與獎金 (+)</span>
-                <button onclick="addCustomIncomeRow()" class="boss-only-action text-[11px] bg-emerald-600 text-white font-bold px-1.5 rounded flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i> 新增</button>
-              </div>
-              <table class="w-full text-xs text-left"><tbody id="custom-income-tbody" class="divide-y divide-emerald-100"></tbody></table>
-            </div>
-
-            <div class="border border-rose-200 bg-rose-50/20 rounded-lg p-2">
-              <div class="flex items-center justify-between pb-1 mb-1 border-b border-rose-200 text-xs">
-                <span class="font-black text-rose-950">應代扣項目 (-)</span>
-                <button onclick="addCustomDeductRow()" class="boss-only-action text-[11px] bg-rose-600 text-white font-bold px-1.5 rounded flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i> 新增</button>
-              </div>
-              <table class="w-full text-xs text-left"><tbody id="custom-deduct-tbody" class="divide-y divide-rose-100"></tbody></table>
-            </div>
-          </div>
-
-          <div class="bg-slate-900 text-white rounded-lg p-2.5 flex justify-between items-center">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <div>
-              <span class="text-[10px] text-slate-400 font-bold uppercase">本期實領淨額</span>
-              <div class="text-xl sm:text-2xl font-black font-mono text-amber-300" id="final-net-total">$ 0</div>
+              <div class="flex items-center justify-between pb-1 mb-2 border-b border-slate-200 text-xs">
+                <span class="font-bold text-slate-700">二、本期加給與獎金 (+)</span>
+                <button onclick="addCustomIncomeRow()" class="boss-only-action text-[10px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i> 新增</button>
+              </div>
+              <table class="w-full text-xs text-left">
+                <tbody id="custom-income-tbody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between pb-1 mb-2 border-b border-slate-200 text-xs">
+                <span class="font-bold text-slate-700">三、本期代扣項目 (-)</span>
+                <button onclick="addCustomDeductRow()" class="boss-only-action text-[10px] font-semibold text-rose-600 hover:text-rose-800 transition-colors flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i> 新增</button>
+              </div>
+              <table class="w-full text-xs text-left">
+                <tbody id="custom-deduct-tbody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-300 flex justify-end items-center">
+            <div class="text-right">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mr-4">NET PAY</span>
+              <span class="text-2xl font-black font-mono text-slate-900" id="final-net-total">$ 0</span>
             </div>
           </div>
         </div>
@@ -355,10 +377,10 @@
 
     let authUser = null;
     let currentUserRole = 'pending';
-    let currentRole = 'user'; // ui mode (user vs admin view)
+    let currentRole = 'user'; 
     let currentView = 'teaching';
-    let currentUserId = null; // currently selected user to view/edit
-    let currentFilterMonth = '2026-08';
+    let currentUserId = null; 
+    let currentFilterMonth = ''; 
     let autoSaveTimeout = null;
 
     let teachersDB = {};
@@ -366,6 +388,22 @@
         hourlyRate: 660, monthlySalary: 0, lockedMonths: {},
         teachingList: [], overtimeList: [], leaveList: [], customIncomeList: [], customDeductList: []
     };
+
+    // 動態產生最近 12 個月的選項
+    function initMonthSelector() {
+      const select = document.getElementById('monthFilter');
+      select.innerHTML = '';
+      const now = new Date();
+      for (let i = 0; i < 12; i++) {
+        let d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        let y = d.getFullYear();
+        let m = String(d.getMonth() + 1).padStart(2, '0');
+        let twYear = y - 1911;
+        let val = `${y}-${m}`;
+        select.innerHTML += `<option value="${val}">${twYear}年${d.getMonth() + 1}月</option>`;
+      }
+      currentFilterMonth = select.value;
+    }
 
     function showScreen(screenId) {
       ['auth-screen', 'pending-screen', 'app-container'].forEach(id => {
@@ -379,7 +417,7 @@
     async function loginWithGoogle() {
       await supabaseClient.auth.signInWithOAuth({ 
         provider: 'google',
-        options: { redirectTo: window.location.origin }
+        options: { redirectTo: window.location.origin + window.location.pathname }
       });
     }
 
@@ -418,12 +456,12 @@
         showScreen('pending-screen');
       } else {
         showScreen('app-container');
+        initMonthSelector();
         await loadAllData();
       }
     }
 
     async function loadAllData() {
-      // 1. 抓取所有合法使用者建立下拉選單
       const { data: allUsers } = await supabaseClient.from('users').select('*').in('role', ['admin', 'user', 'part_time']);
       
       const teacherSelect = document.getElementById('teacherSelect');
@@ -437,7 +475,6 @@
         }
       });
 
-      // 2. 抓取薪資檔案庫資料
       const { data: records } = await supabaseClient.from('payroll_records').select('*').eq('month', currentFilterMonth);
       if (records) {
         records.forEach(rec => {
@@ -447,18 +484,19 @@
         });
       }
 
-      // 初始化目前操作者
       currentUserId = authUser.id;
       if (currentUserRole === 'admin') {
           currentRole = 'admin';
           document.getElementById('adminUserSwitchBox').classList.remove('hidden');
           document.getElementById('btn-admin-panel').classList.remove('hidden');
           document.getElementById('btnMonthLock').classList.remove('hidden');
+          document.getElementById('btnMonthLock').classList.add('flex');
       } else {
-          currentRole = 'user'; // user or part_time
+          currentRole = 'user';
           document.getElementById('adminUserSwitchBox').classList.add('hidden');
           document.getElementById('btn-admin-panel').classList.add('hidden');
           document.getElementById('btnMonthLock').classList.add('hidden');
+          document.getElementById('btnMonthLock').classList.remove('flex');
       }
 
       document.getElementById('current-user-name').textContent = authUser.name;
@@ -474,8 +512,9 @@
     function triggerAutoSave() {
       const statusBox = document.getElementById('saveStatusIndicator');
       const statusText = document.getElementById('saveStatusText');
-      statusBox.className = 'flex items-center gap-1 text-xs text-amber-700 px-2 py-1 bg-amber-50 rounded-md border border-amber-200';
-      statusText.textContent = '儲存中...';
+      statusBox.className = 'flex items-center gap-1.5 text-[11px] text-amber-600 font-medium px-2 py-1';
+      statusBox.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span id="saveStatusText">儲存中...</span>';
+      lucide.createIcons();
 
       clearTimeout(autoSaveTimeout);
       autoSaveTimeout = setTimeout(async () => {
@@ -487,13 +526,15 @@
               data: targetData
           }, { onConflict: 'user_id, month' });
 
-          statusBox.className = 'flex items-center gap-1 text-xs text-emerald-600 px-2 py-1 bg-emerald-50 rounded-md border border-emerald-200';
-          statusText.textContent = '已存檔雲端';
+          statusBox.className = 'flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium px-2 py-1';
+          statusBox.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i><span id="saveStatusText">已存檔</span>';
+          lucide.createIcons();
         } catch (err) {
-          statusBox.className = 'flex items-center gap-1 text-xs text-rose-600 px-2 py-1 bg-rose-50 rounded-md border border-rose-200';
-          statusText.textContent = '存檔失敗';
+          statusBox.className = 'flex items-center gap-1.5 text-[11px] text-rose-600 font-medium px-2 py-1';
+          statusBox.innerHTML = '<i data-lucide="x" class="w-3.5 h-3.5"></i><span id="saveStatusText">存檔失敗</span>';
+          lucide.createIcons();
         }
-      }, 500);
+      }, 600);
     }
 
     // ==== 審核面板 ====
@@ -535,7 +576,7 @@
 
     async function onMonthChange(mVal) {
       currentFilterMonth = mVal;
-      await loadAllData(); // 重載該月份資料
+      await loadAllData(); 
     }
 
     function onSelectTeacher(userId) {
@@ -544,7 +585,7 @@
       renderAll(); 
     }
 
-    // ========== 原有 UI 邏輯層 (保留原有計算與排版) ==========
+    // ========== UI 邏輯層 ==========
     
     function isCurrentMonthLocked() {
       const user = teachersDB[currentUserId];
@@ -557,7 +598,7 @@
       if (!user.lockedMonths) user.lockedMonths = {};
       
       const newStatus = !Boolean(user.lockedMonths[currentFilterMonth]);
-      if (confirm(newStatus ? `確定將【${currentFilterMonth}】結算資料全數封存鎖定嗎？` : `確定要解鎖【${currentFilterMonth}】的封存資料嗎？`)) {
+      if (confirm(newStatus ? `確定將此月結算資料全數封存鎖定嗎？` : `確定要解鎖此月的封存資料嗎？`)) {
         user.lockedMonths[currentFilterMonth] = newStatus;
         renderAll(); 
         triggerAutoSave(); 
@@ -571,12 +612,12 @@
       const lockText = document.getElementById('textMonthLock');
       
       if (isLocked) {
-        lockBtn.className = 'flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-md transition-all border bg-rose-50 text-rose-700 border-rose-300';
-        lockText.textContent = '已封存關帳'; 
+        lockBtn.className = 'flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-md transition-all bg-rose-50 text-rose-700 border border-rose-200';
+        lockText.textContent = '已封存'; 
         lockIcon.setAttribute('data-lucide', 'lock');
       } else {
-        lockBtn.className = 'flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-md transition-all border bg-emerald-50 text-emerald-700 border-emerald-300';
-        lockText.textContent = '開放編輯中'; 
+        lockBtn.className = 'flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-md transition-all bg-white text-slate-700 border border-slate-300';
+        lockText.textContent = '編輯中'; 
         lockIcon.setAttribute('data-lucide', 'lock-open');
       }
       
@@ -600,6 +641,11 @@
     function applyUserContext() {
       const user = teachersDB[currentUserId];
       if (!user) return;
+      
+      const selectObj = document.getElementById('monthFilter');
+      const yLabel = selectObj.options[selectObj.selectedIndex].text;
+      document.getElementById('display-salary-month').textContent = yLabel;
+
       document.getElementById('teacherSelect').value = currentUserId;
       document.getElementById('globalHourlyRate').value = user.hourlyRate || 660;
       document.getElementById('globalMonthlySalary').value = user.monthlySalary || 0;
@@ -622,13 +668,13 @@
       currentView = viewName;
       document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
       document.getElementById(`view-${viewName}`).classList.remove('hidden');
+      
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-white', 'text-indigo-700', 'border-t', 'border-x', 'shadow-[0_-2px_4px_rgba(0,0,0,0.02)]');
-        btn.classList.add('bg-slate-100', 'text-slate-500');
+        btn.classList.remove('active', 'bg-white', 'text-indigo-700', 'border-t', 'border-x');
       });
       const activeTab = document.getElementById(`tab-${viewName}`);
-      activeTab.classList.remove('bg-slate-100', 'text-slate-500');
-      activeTab.classList.add('bg-white', 'text-indigo-700', 'border-t', 'border-x', 'shadow-[0_-2px_4px_rgba(0,0,0,0.02)]');
+      activeTab.classList.add('active');
+      
       if (viewName === 'salary') renderSalaryView();
       lucide.createIcons();
     }
@@ -694,22 +740,22 @@
       
       tbody.innerHTML = user.teachingList.filter(r => isRowInCurrentMonth(r.date)).map((row, idx) => {
         const linePay = (mSalary > 0) ? 0 : Math.round((Number(row.approvedHours) || 0) * hRate);
-        return `<tr class="hover:bg-slate-50 border-b border-slate-200">
-          <td class="p-1 text-center text-slate-400 font-mono">${idx+1}</td>
-          <td class="p-1"><input type="date" value="${row.date}" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'date', this.value)" class="table-input w-full bg-white border border-slate-300 rounded px-1 text-xs"></td>
-          <td class="p-1"><input type="text" value="${row.location}" placeholder="分校" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'location', this.value)" class="table-input w-full bg-white border border-slate-300 rounded px-1.5 text-xs"></td>
-          <td class="p-1 text-center"><div class="flex gap-1"><input type="text" value="${row.startTime}" ${isLocked ? 'disabled' : ''} onchange="updateTeachingTime(${row.id}, 'startTime', this.value)" class="table-input w-12 border rounded px-0.5 text-center text-xs">~<input type="text" value="${row.endTime}" ${isLocked ? 'disabled' : ''} onchange="updateTeachingTime(${row.id}, 'endTime', this.value)" class="table-input w-12 border rounded px-0.5 text-center text-xs"></div></td>
-          <td class="p-1"><input type="text" value="${row.note}" placeholder="進度" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'note', this.value)" class="table-input w-full bg-white border border-slate-300 rounded px-1.5 text-xs"></td>
-          <td class="p-1 text-center"><input type="number" step="0.5" value="${row.approvedHours}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'approvedHours', this.value)" class="table-input w-11 text-center border rounded px-0.5 text-xs"></td>
-          <td class="p-1 text-right text-indigo-800 pr-2">${(mSalary > 0) ? '(月薪)' : '$'+linePay}</td>
-          <td class="p-1"><input type="text" value="${row.expenseTitle}" placeholder="名目" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'expenseTitle', this.value)" class="table-input w-full border rounded px-1 text-xs"></td>
-          <td class="p-1"><input type="number" value="${row.expenseClaimed}" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'expenseClaimed', this.value)" class="table-input w-14 text-right border rounded px-1 text-xs"></td>
-          <td class="p-1 text-center"><input type="checkbox" ${row.expenseApproved ? 'checked' : ''} ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'expenseApproved', this.checked)"></td>
-          <td class="p-1 text-center row-action-cell">${!isLocked ? `<button onclick="deleteTeachingRow(${row.id})" class="text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}</td>
+        return `<tr class="hover:bg-slate-50 border-b border-slate-100">
+          <td class="p-2 text-center text-slate-400 font-mono border-r border-slate-100">${idx+1}</td>
+          <td class="p-2 border-r border-slate-100"><input type="date" value="${row.date}" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'date', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="p-2 border-r border-slate-100"><input type="text" value="${row.location}" placeholder="專案名稱" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'location', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="p-2 text-center border-r border-slate-100"><div class="flex items-center justify-center gap-0.5"><input type="text" value="${row.startTime}" ${isLocked ? 'disabled' : ''} onchange="updateTeachingTime(${row.id}, 'startTime', this.value)" class="table-input w-11 bg-transparent border border-transparent rounded px-0.5 text-center text-xs text-slate-600"><span>-</span><input type="text" value="${row.endTime}" ${isLocked ? 'disabled' : ''} onchange="updateTeachingTime(${row.id}, 'endTime', this.value)" class="table-input w-11 bg-transparent border border-transparent rounded px-0.5 text-center text-xs text-slate-600"></div></td>
+          <td class="p-2 border-r border-slate-100"><input type="text" value="${row.note}" placeholder="備註說明" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'note', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs text-slate-500"></td>
+          <td class="p-2 text-center border-r border-slate-100"><input type="number" step="0.5" value="${row.approvedHours}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'approvedHours', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs font-bold text-slate-700"></td>
+          <td class="p-2 text-right border-r border-slate-100 pr-3 font-medium text-slate-700">${(mSalary > 0) ? '(月薪)' : '$'+linePay}</td>
+          <td class="p-2 border-r border-slate-100"><input type="text" value="${row.expenseTitle}" placeholder="停車/車資" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'expenseTitle', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="p-2 border-r border-slate-100"><input type="number" value="${row.expenseClaimed}" ${isLocked ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'expenseClaimed', this.value)" class="table-input w-full text-right bg-transparent border border-transparent rounded px-1 text-xs font-medium"></td>
+          <td class="p-2 text-center border-r border-slate-100"><input type="checkbox" ${row.expenseApproved ? 'checked' : ''} ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateTeaching(${row.id}, 'expenseApproved', this.checked)" class="accent-indigo-600 w-3.5 h-3.5 cursor-pointer"></td>
+          <td class="p-2 text-center row-action-cell">${!isLocked ? `<button onclick="deleteTeachingRow(${row.id})" class="text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>` : ''}</td>
         </tr>`;
       }).join('');
       const totals = calcTotals();
-      document.getElementById('stat-teaching-classes').textContent = `${totals.teachingClasses} 堂`;
+      document.getElementById('stat-teaching-classes').textContent = `${totals.teachingClasses}`;
       document.getElementById('stat-teaching-approved-hours').textContent = `${totals.teachingApprovedHours.toFixed(1)} h`;
       document.getElementById('stat-teaching-total-pay').textContent = `$ ${totals.teachingTotalPay.toLocaleString()}`;
       document.getElementById('stat-expense-approved-total').textContent = `$ ${totals.totalExpenseApproved.toLocaleString()}`;
@@ -717,7 +763,7 @@
     
     function addTeachingRow() {
       if (isCurrentMonthLocked()) return; 
-      teachersDB[currentUserId].teachingList.push({ id: Date.now(), date: `${currentFilterMonth}-01`, location: '線上', startTime: '18:30', endTime: '21:30', approvedHours: 3.0, note: '', expenseTitle: '', expenseClaimed: 0, expenseApproved: false });
+      teachersDB[currentUserId].teachingList.push({ id: Date.now(), date: `${currentFilterMonth}-01`, location: '專案名稱', startTime: '18:30', endTime: '21:30', approvedHours: 3.0, note: '', expenseTitle: '', expenseClaimed: 0, expenseApproved: false });
       renderAll(); triggerAutoSave();
     }
     function updateTeaching(id, field, value) {
@@ -741,17 +787,17 @@
       const isAdmin = (currentUserRole === 'admin'), isLocked = isCurrentMonthLocked();
       tbody.innerHTML = user.overtimeList.filter(r => isRowInCurrentMonth(r.date)).map((row, idx) => {
         const linePay = row.approved ? Math.round((Number(row.approvedHours)||0) * (Number(row.baseRate)||0) * (Number(row.multiplier)||1)) : 0;
-        return `<tr class="hover:bg-slate-50 border-b border-slate-200">
-          <td class="p-1 text-center text-slate-400 font-mono">${idx+1}</td>
-          <td class="p-1"><input type="date" value="${row.date}" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'date', this.value)" class="table-input w-full border rounded px-1 text-xs"></td>
-          <td class="p-1 text-center"><div class="flex gap-1"><input type="text" value="${row.startTime}" ${isLocked ? 'disabled' : ''} onchange="updateOvertimeTime(${row.id}, 'startTime', this.value)" class="table-input w-12 border rounded px-0.5 text-center text-xs">~<input type="text" value="${row.endTime}" ${isLocked ? 'disabled' : ''} onchange="updateOvertimeTime(${row.id}, 'endTime', this.value)" class="table-input w-12 border rounded px-0.5 text-center text-xs"></div></td>
-          <td class="p-1"><input type="text" value="${row.reason}" placeholder="加班事由" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'reason', this.value)" class="table-input w-full border rounded px-1.5 text-xs"></td>
-          <td class="p-1 text-center"><input type="number" step="0.5" value="${row.approvedHours}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approvedHours', this.value)" class="table-input w-11 text-center border rounded px-0.5 text-xs"></td>
-          <td class="p-1 text-center"><input type="number" step="10" value="${row.baseRate}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'baseRate', this.value)" class="table-input w-13 text-center border rounded px-1 text-xs"></td>
-          <td class="p-1 text-center"><select ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'multiplier', this.value)" class="table-input w-14 text-center border rounded px-0.5 text-xs"><option value="1.0" ${row.multiplier==1.0?'selected':''}>1.0x</option><option value="1.34" ${row.multiplier==1.34?'selected':''}>1.34x</option><option value="1.67" ${row.multiplier==1.67?'selected':''}>1.67x</option></select></td>
-          <td class="p-1 text-center"><input type="checkbox" ${row.approved ? 'checked' : ''} ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approved', this.checked)"></td>
-          <td class="p-1 text-right pr-2 ${row.approved ? 'text-emerald-700' : 'text-slate-400 line-through'}">$ ${linePay.toLocaleString()}</td>
-          <td class="p-1 text-center row-action-cell">${!isLocked ? `<button onclick="deleteOvertimeRow(${row.id})" class="text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}</td>
+        return `<tr class="hover:bg-slate-50 border-b border-slate-100">
+          <td class="p-2 text-center text-slate-400 font-mono border-r border-slate-100">${idx+1}</td>
+          <td class="p-2 border-r border-slate-100"><input type="date" value="${row.date}" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'date', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="p-2 text-center border-r border-slate-100"><div class="flex items-center justify-center gap-0.5"><input type="text" value="${row.startTime}" ${isLocked ? 'disabled' : ''} onchange="updateOvertimeTime(${row.id}, 'startTime', this.value)" class="table-input w-11 bg-transparent border border-transparent rounded px-0.5 text-center text-xs text-slate-600"><span>-</span><input type="text" value="${row.endTime}" ${isLocked ? 'disabled' : ''} onchange="updateOvertimeTime(${row.id}, 'endTime', this.value)" class="table-input w-11 bg-transparent border border-transparent rounded px-0.5 text-center text-xs text-slate-600"></div></td>
+          <td class="p-2 border-r border-slate-100"><input type="text" value="${row.reason}" placeholder="事由" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'reason', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs text-slate-500"></td>
+          <td class="p-2 border-r border-slate-100"><input type="number" step="0.5" value="${row.approvedHours}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approvedHours', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs font-bold text-slate-700"></td>
+          <td class="p-2 border-r border-slate-100"><input type="number" step="10" value="${row.baseRate}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'baseRate', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="p-2 border-r border-slate-100"><select ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'multiplier', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"><option value="1.0" ${row.multiplier==1.0?'selected':''}>1.0x</option><option value="1.34" ${row.multiplier==1.34?'selected':''}>1.34x</option><option value="1.67" ${row.multiplier==1.67?'selected':''}>1.67x</option></select></td>
+          <td class="p-2 text-center border-r border-slate-100"><input type="checkbox" ${row.approved ? 'checked' : ''} ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approved', this.checked)" class="accent-indigo-600 w-3.5 h-3.5 cursor-pointer"></td>
+          <td class="p-2 text-right pr-3 font-medium border-r border-slate-100 ${row.approved ? 'text-slate-800' : 'text-slate-300 line-through'}">$ ${linePay.toLocaleString()}</td>
+          <td class="p-2 text-center row-action-cell">${!isLocked ? `<button onclick="deleteOvertimeRow(${row.id})" class="text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>` : ''}</td>
         </tr>`;
       }).join('');
       const totals = calcTotals();
@@ -762,7 +808,7 @@
     
     function addOvertimeRow() {
       if (isCurrentMonthLocked()) return;
-      teachersDB[currentUserId].overtimeList.push({ id: Date.now(), date: `${currentFilterMonth}-01`, startTime: '18:00', endTime: '20:00', reason: '加班', approvedHours: 2.0, baseRate: 200, multiplier: 1.34, approved: false });
+      teachersDB[currentUserId].overtimeList.push({ id: Date.now(), date: `${currentFilterMonth}-01`, startTime: '18:00', endTime: '20:00', reason: '專案需求', approvedHours: 2.0, baseRate: 200, multiplier: 1.34, approved: false });
       renderAll(); triggerAutoSave();
     }
     function updateOvertime(id, field, value) {
@@ -787,16 +833,16 @@
       tbody.innerHTML = user.leaveList.filter(r => isRowInCurrentMonth(r.date)).map((row, idx) => {
         const effectiveDays = row.useHours ? ((Number(row.hours)||0)/8) : (Number(row.days)||0);
         const lineDeduct = Math.round(effectiveDays * (Number(row.dailyRate)||0) * (Number(row.deductRate)||0));
-        return `<tr class="hover:bg-slate-50 border-b border-slate-200">
-          <td class="p-1 text-center text-slate-400 font-mono">${idx+1}</td>
-          <td class="p-1"><input type="date" value="${row.date}" ${isLocked ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'date', this.value)" class="table-input w-full border rounded px-1 text-xs"></td>
-          <td class="p-1"><select onchange="updateLeave(${row.id}, 'type', this.value)" ${isLocked ? 'disabled' : ''} class="table-input w-full border rounded px-1 text-xs"><option value="排休" ${row.type==='排休'?'selected':''}>排休</option><option value="特休" ${row.type==='特休'?'selected':''}>特休</option><option value="事假" ${row.type==='事假'?'selected':''}>事假</option><option value="病假" ${row.type==='病假'?'selected':''}>病假</option></select></td>
-          <td class="p-1 text-center"><div class="flex gap-1"><button onclick="updateLeave(${row.id}, 'setDays', 0.5)" ${isLocked ? 'disabled' : ''} class="${(!row.useHours&&row.days===0.5)?'bg-indigo-100 text-indigo-700':'text-slate-400'} px-1 rounded text-[11px]">半</button><button onclick="updateLeave(${row.id}, 'setDays', 1.0)" ${isLocked ? 'disabled' : ''} class="${(!row.useHours&&row.days===1.0)?'bg-indigo-100 text-indigo-700':'text-slate-400'} px-1 rounded text-[11px]">全</button><input type="number" step="0.5" value="${row.useHours?row.hours:''}" placeholder="h" ${isLocked ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'setHours', this.value)" class="table-input w-10 text-center border rounded px-1 text-xs"></div></td>
-          <td class="p-1"><input type="text" value="${row.reason}" placeholder="事由" ${isLocked ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'reason', this.value)" class="table-input w-full border rounded px-1.5 text-xs"></td>
-          <td class="p-1"><input type="number" step="10" value="${row.dailyRate}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'dailyRate', this.value)" class="table-input w-full text-center border rounded px-1 text-xs"></td>
-          <td class="p-1"><select ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'deductRate', this.value)" class="table-input w-full border rounded px-1 text-xs"><option value="1.0" ${row.deductRate==1.0?'selected':''}>全扣</option><option value="0.5" ${row.deductRate==0.5?'selected':''}>半扣</option><option value="0.0" ${row.deductRate==0.0?'selected':''}>不扣</option></select></td>
-          <td class="p-1 text-right pr-2 text-rose-700">-$ ${lineDeduct.toLocaleString()}</td>
-          <td class="p-1 text-center row-action-cell">${!isLocked ? `<button onclick="deleteLeaveRow(${row.id})" class="text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}</td>
+        return `<tr class="hover:bg-slate-50 border-b border-slate-100">
+          <td class="p-2 text-center text-slate-400 font-mono border-r border-slate-100">${idx+1}</td>
+          <td class="p-2 border-r border-slate-100"><input type="date" value="${row.date}" ${isLocked ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'date', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="p-2 border-r border-slate-100"><select onchange="updateLeave(${row.id}, 'type', this.value)" ${isLocked ? 'disabled' : ''} class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"><option value="排休" ${row.type==='排休'?'selected':''}>排休</option><option value="特休" ${row.type==='特休'?'selected':''}>特休</option><option value="事假" ${row.type==='事假'?'selected':''}>事假</option><option value="病假" ${row.type==='病假'?'selected':''}>病假</option></select></td>
+          <td class="p-2 text-center border-r border-slate-100"><div class="flex items-center justify-center gap-1"><button onclick="updateLeave(${row.id}, 'setDays', 0.5)" ${isLocked ? 'disabled' : ''} class="${(!row.useHours&&row.days===0.5)?'bg-slate-200 text-slate-800 font-bold':'text-slate-400'} px-1.5 py-0.5 rounded text-[10px] transition-colors">半天</button><button onclick="updateLeave(${row.id}, 'setDays', 1.0)" ${isLocked ? 'disabled' : ''} class="${(!row.useHours&&row.days===1.0)?'bg-slate-200 text-slate-800 font-bold':'text-slate-400'} px-1.5 py-0.5 rounded text-[10px] transition-colors">全天</button><input type="number" step="0.5" value="${row.useHours?row.hours:''}" placeholder="h" ${isLocked ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'setHours', this.value)" class="table-input w-10 text-center bg-transparent border border-transparent border-b-slate-300 rounded-none px-1 text-xs"></div></td>
+          <td class="p-2 border-r border-slate-100"><input type="text" value="${row.reason}" placeholder="事由" ${isLocked ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'reason', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs text-slate-500"></td>
+          <td class="p-2 border-r border-slate-100"><input type="number" step="10" value="${row.dailyRate}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'dailyRate', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="p-2 border-r border-slate-100"><select ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateLeave(${row.id}, 'deductRate', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"><option value="1.0" ${row.deductRate==1.0?'selected':''}>全扣</option><option value="0.5" ${row.deductRate==0.5?'selected':''}>半扣</option><option value="0.0" ${row.deductRate==0.0?'selected':''}>不扣</option></select></td>
+          <td class="p-2 text-right pr-3 font-medium border-r border-slate-100 text-rose-600">-$ ${lineDeduct.toLocaleString()}</td>
+          <td class="p-2 text-center row-action-cell">${!isLocked ? `<button onclick="deleteLeaveRow(${row.id})" class="text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>` : ''}</td>
         </tr>`;
       }).join('');
       const totals = calcTotals();
@@ -847,12 +893,20 @@
 
       const incomeTbody = document.getElementById('custom-income-tbody');
       incomeTbody.innerHTML = user.customIncomeList.map(item => `
-        <tr><td class="py-1"><input type="text" value="${item.title}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateCustomItem('income', ${item.id}, 'title', this.value)" class="w-full border rounded px-1.5 text-xs ${(isAdmin && !isLocked) ? 'bg-white' : ''}"></td><td class="py-1 text-right"><span class="text-emerald-600">+</span><input type="number" value="${item.amount}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateCustomItem('income', ${item.id}, 'amount', this.value)" class="w-20 text-right border rounded px-1 text-emerald-800 text-xs ${(isAdmin && !isLocked) ? 'bg-white border-emerald-300' : ''}"></td><td class="py-1 text-center">${(isAdmin && !isLocked) ? `<button onclick="deleteCustomItem('income', ${item.id})" class="text-rose-600"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>` : ''}</td></tr>
+        <tr>
+          <td class="py-1.5"><input type="text" value="${item.title}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateCustomItem('income', ${item.id}, 'title', this.value)" class="w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="py-1.5 text-right"><div class="flex items-center justify-end gap-1"><span class="text-slate-400">+</span><input type="number" value="${item.amount}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateCustomItem('income', ${item.id}, 'amount', this.value)" class="w-20 text-right bg-transparent border border-transparent rounded px-1 text-slate-800 font-medium text-xs"></div></td>
+          <td class="py-1.5 text-center">${(isAdmin && !isLocked) ? `<button onclick="deleteCustomItem('income', ${item.id})" class="text-slate-300 hover:text-rose-500"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>` : ''}</td>
+        </tr>
       `).join('');
       
       const deductTbody = document.getElementById('custom-deduct-tbody');
       deductTbody.innerHTML = user.customDeductList.map(item => `
-        <tr><td class="py-1"><input type="text" value="${item.title}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateCustomItem('deduct', ${item.id}, 'title', this.value)" class="w-full border rounded px-1.5 text-xs ${(isAdmin && !isLocked) ? 'bg-white' : ''}"></td><td class="py-1 text-right"><span class="text-rose-600">-</span><input type="number" value="${Math.abs(item.amount)}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateCustomItem('deduct', ${item.id}, 'amount', this.value)" class="w-20 text-right border rounded px-1 text-rose-800 text-xs ${(isAdmin && !isLocked) ? 'bg-white border-rose-300' : ''}"></td><td class="py-1 text-center">${(isAdmin && !isLocked) ? `<button onclick="deleteCustomItem('deduct', ${item.id})" class="text-rose-600"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>` : ''}</td></tr>
+        <tr>
+          <td class="py-1.5"><input type="text" value="${item.title}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateCustomItem('deduct', ${item.id}, 'title', this.value)" class="w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
+          <td class="py-1.5 text-right"><div class="flex items-center justify-end gap-1"><span class="text-slate-400">-</span><input type="number" value="${Math.abs(item.amount)}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateCustomItem('deduct', ${item.id}, 'amount', this.value)" class="w-20 text-right bg-transparent border border-transparent rounded px-1 text-rose-600 font-medium text-xs"></div></td>
+          <td class="py-1.5 text-center">${(isAdmin && !isLocked) ? `<button onclick="deleteCustomItem('deduct', ${item.id})" class="text-slate-300 hover:text-rose-500"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>` : ''}</td>
+        </tr>
       `).join('');
 
       document.getElementById('final-net-total').textContent = `$ ${totals.netPay.toLocaleString()}`;
@@ -860,11 +914,11 @@
 
     function addCustomIncomeRow() {
       if (isCurrentMonthLocked()) return; 
-      teachersDB[currentUserId].customIncomeList.push({ id: Date.now(), title: '加給/績效獎金', amount: 2000 }); renderSalaryView(); triggerAutoSave();
+      teachersDB[currentUserId].customIncomeList.push({ id: Date.now(), title: '加給/績效獎金', amount: 1000 }); renderSalaryView(); triggerAutoSave();
     }
     function addCustomDeductRow() {
       if (isCurrentMonthLocked()) return; 
-      teachersDB[currentUserId].customDeductList.push({ id: Date.now(), title: '代扣項目', amount: 300 }); renderSalaryView(); triggerAutoSave();
+      teachersDB[currentUserId].customDeductList.push({ id: Date.now(), title: '代扣項目', amount: 100 }); renderSalaryView(); triggerAutoSave();
     }
     function updateCustomItem(type, id, field, value) {
       if (isCurrentMonthLocked()) return; 
@@ -880,6 +934,26 @@
 
     function renderAll() { 
       updateLockUI(); renderTeachingView(); renderOvertimeView(); renderLeaveView(); renderSalaryView(); 
+    }
+
+    function exportToPNG(elementId, filenamePrefix) {
+      const element = document.getElementById(elementId); 
+      if (!element) return;
+      const user = teachersDB[currentUserId]; 
+      
+      html2canvas(element, { 
+        scale: 2, 
+        useCORS: true, 
+        backgroundColor: '#ffffff', 
+        logging: false 
+      }).then(canvas => {
+        const link = document.createElement('a'); 
+        link.download = `邱小民社會_${user.name}_${currentFilterMonth}_${filenamePrefix}.png`; 
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link); 
+        link.click(); 
+        document.body.removeChild(link);
+      }).catch(() => { alert('匯出圖檔失敗'); });
     }
   </script>
 </body>
