@@ -781,59 +781,69 @@
       teachersDB[currentUserId].teachingList = teachersDB[currentUserId].teachingList.filter(r => r.id !== id); renderAll(); triggerAutoSave();
     }
 
-    // 加班回報
-    function renderOvertimeView() {
-      const user = teachersDB[currentUserId], tbody = document.getElementById('overtime-tbody');
-      const isAdmin = (currentUserRole === 'admin'), isLocked = isCurrentMonthLocked();
-      tbody.innerHTML = user.overtimeList.filter(r => isRowInCurrentMonth(r.date)).map((row, idx) => {
-        const linePay = row.approved ? Math.round((Number(row.approvedHours)||0) * (Number(row.baseRate)||0) * (Number(row.multiplier)||1)) : 0;
-        return `<tr class="hover:bg-slate-50 border-b border-slate-100">
-          <td class="p-2 text-center text-slate-400 font-mono border-r border-slate-100">${idx+1}</td>
-          <td class="p-2 border-r border-slate-100"><input type="date" value="${row.date}" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'date', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
-          <td class="p-2 text-center border-r border-slate-100"><div class="flex items-center justify-center gap-0.5"><input type="text" value="${row.startTime}" ${isLocked ? 'disabled' : ''} onchange="updateOvertimeTime(${row.id}, 'startTime', this.value)" class="table-input w-11 bg-transparent border border-transparent rounded px-0.5 text-center text-xs text-slate-600"><span>-</span><input type="text" value="${row.endTime}" ${isLocked ? 'disabled' : ''} onchange="updateOvertimeTime(${row.id}, 'endTime', this.value)" class="table-input w-11 bg-transparent border border-transparent rounded px-0.5 text-center text-xs text-slate-600"></div></td>
-          <td class="p-2 border-r border-slate-100"><input type="text" value="${row.reason}" placeholder="事由" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'reason', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs text-slate-500"></td>
-          <td class="p-2 border-r border-slate-100"><input type="number" step="0.5" value="${row.approvedHours}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approvedHours', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs font-bold text-slate-700"></td>
-          <td class="p-2 border-r border-slate-100"><input type="number" step="10" value="${row.baseRate}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'baseRate', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs"></td>
-          
-          <td class="p-2 border-r border-slate-100">
-            <select ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'multiplier', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs">
-              <option value="1.34" ${row.multiplier==1.34?'selected':''}>1.34x</option>
-              <option value="1.67" ${row.multiplier==1.67?'selected':''}>1.67x</option>
-              <option value="2.0" ${row.multiplier==2.0?'selected':''}>2.0x</option>
-              <option value="2.67" ${row.multiplier==2.67?'selected':''}>2.67x</option>
-            </select>
-          </td>
+   // 加班回報
+function renderOvertimeView() {
+  const user = teachersDB[currentUserId], tbody = document.getElementById('overtime-tbody');
+  const isAdmin = (currentUserRole === 'admin'), isLocked = isCurrentMonthLocked();
+  tbody.innerHTML = user.overtimeList.filter(r => isRowInCurrentMonth(r.date)).map((row, idx) => {
+    const linePay = row.approved ? Math.round((Number(row.approvedHours)||0) * (Number(row.baseRate)||0) * (Number(row.multiplier)||1)) : 0;
+    const curMultiplier = Number(row.multiplier);
 
-          <td class="p-2 text-center border-r border-slate-100"><input type="checkbox" ${row.approved ? 'checked' : ''} ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approved', this.checked)" class="accent-indigo-600 w-3.5 h-3.5 cursor-pointer"></td>
-          <td class="p-2 text-right pr-3 font-medium border-r border-slate-100 ${row.approved ? 'text-slate-800' : 'text-slate-300 line-through'}">$ ${linePay.toLocaleString()}</td>
-          <td class="p-2 text-center row-action-cell">${!isLocked ? `<button onclick="deleteOvertimeRow(${row.id})" class="text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>` : ''}</td>
-        </tr>`;
-      }).join('');
-      const totals = calcTotals();
-      document.getElementById('stat-ot-claimed-hours').textContent = `${totals.otClaimedHours.toFixed(1)} h`;
-      document.getElementById('stat-ot-approved-hours').textContent = `${totals.otApprovedHours.toFixed(1)} h`;
-      document.getElementById('stat-ot-total-pay').textContent = `$ ${totals.otTotalPay.toLocaleString()}`;
+    return `<tr class="hover:bg-slate-50 border-b border-slate-100">
+      <td class="p-2 text-center text-slate-400 font-mono border-r border-slate-100">${idx+1}</td>
+      <td class="p-2 border-r border-slate-100"><input type="date" value="${row.date}" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'date', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"></td>
+      <td class="p-2 text-center border-r border-slate-100"><div class="flex items-center justify-center gap-0.5"><input type="text" value="${row.startTime}" ${isLocked ? 'disabled' : ''} onchange="updateOvertimeTime(${row.id}, 'startTime', this.value)" class="table-input w-11 bg-transparent border border-transparent rounded px-0.5 text-center text-xs text-slate-600"><span>-</span><input type="text" value="${row.endTime}" ${isLocked ? 'disabled' : ''} onchange="updateOvertimeTime(${row.id}, 'endTime', this.value)" class="table-input w-11 bg-transparent border border-transparent rounded px-0.5 text-center text-xs text-slate-600"></div></td>
+      <td class="p-2 border-r border-slate-100"><input type="text" value="${row.reason}" placeholder="事由" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'reason', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs text-slate-500"></td>
+      <td class="p-2 border-r border-slate-100"><input type="number" step="0.5" value="${row.approvedHours}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approvedHours', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs font-bold text-slate-700"></td>
+      <td class="p-2 border-r border-slate-100"><input type="number" step="10" value="${row.baseRate}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'baseRate', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs"></td>
+      
+      <td class="p-2 border-r border-slate-100">
+        <select ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'multiplier', Number(this.value))" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs">
+          <option value="1.34" ${curMultiplier === 1.34 ? 'selected' : ''}>1.34倍</option>
+          <option value="1.67" ${curMultiplier === 1.67 ? 'selected' : ''}>1.67倍</option>
+          <option value="2.0" ${curMultiplier === 2.0 ? 'selected' : ''}>2倍</option>
+        </select>
+      </td>
+
+      <td class="p-2 text-center border-r border-slate-100"><input type="checkbox" ${row.approved ? 'checked' : ''} ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approved', this.checked)" class="accent-indigo-600 w-3.5 h-3.5 cursor-pointer"></td>
+      <td class="p-2 text-right pr-3 font-medium border-r border-slate-100 ${row.approved ? 'text-slate-800' : 'text-slate-300 line-through'}">$ ${linePay.toLocaleString()}</td>
+      <td class="p-2 text-center row-action-cell">${!isLocked ? `<button onclick="deleteOvertimeRow(${row.id})" class="text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>` : ''}</td>
+    </tr>`;
+  }).join('');
+  const totals = calcTotals();
+  document.getElementById('stat-ot-claimed-hours').textContent = `${totals.otClaimedHours.toFixed(1)} h`;
+  document.getElementById('stat-ot-approved-hours').textContent = `${totals.otApprovedHours.toFixed(1)} h`;
+  document.getElementById('stat-ot-total-pay').textContent = `$ ${totals.otTotalPay.toLocaleString()}`;
+}
+
+function addOvertimeRow() {
+  if (isCurrentMonthLocked()) return;
+  teachersDB[currentUserId].overtimeList.push({ id: Date.now(), date: `${currentFilterMonth}-01`, startTime: '18:00', endTime: '20:00', reason: '專案需求', approvedHours: 2.0, baseRate: 200, multiplier: 1.34, approved: false });
+  renderAll(); triggerAutoSave();
+}
+function updateOvertime(id, field, value) {
+  if (isCurrentMonthLocked()) return;
+  const item = teachersDB[currentUserId].overtimeList.find(r => r.id === id);
+  if (item) { 
+    if (field === 'approved') {
+      item[field] = Boolean(value);
+    } else if (field === 'multiplier' || field === 'approvedHours' || field === 'baseRate') {
+      item[field] = Number(value);
+    } else {
+      item[field] = value;
     }
-    
-    function addOvertimeRow() {
-      if (isCurrentMonthLocked()) return;
-      teachersDB[currentUserId].overtimeList.push({ id: Date.now(), date: `${currentFilterMonth}-01`, startTime: '18:00', endTime: '20:00', reason: '專案需求', approvedHours: 2.0, baseRate: 200, multiplier: 1.34, approved: false });
-      renderAll(); triggerAutoSave();
-    }
-    function updateOvertime(id, field, value) {
-      if (isCurrentMonthLocked()) return;
-      const item = teachersDB[currentUserId].overtimeList.find(r => r.id === id);
-      if (item) { item[field] = (field==='approved') ? Boolean(value) : value; renderAll(); triggerAutoSave(); }
-    }
-    function updateOvertimeTime(id, field, value) {
-      if (isCurrentMonthLocked()) return;
-      const item = teachersDB[currentUserId].overtimeList.find(r => r.id === id);
-      if (item) { item[field] = value; const autoH = calcSmartHours(item.startTime, item.endTime); if (autoH) item.approvedHours = autoH; renderAll(); triggerAutoSave(); }
-    }
-    function deleteOvertimeRow(id) {
-      if (isCurrentMonthLocked()) return;
-      teachersDB[currentUserId].overtimeList = teachersDB[currentUserId].overtimeList.filter(r => r.id !== id); renderAll(); triggerAutoSave();
-    }
+    renderAll(); triggerAutoSave(); 
+  }
+}
+function updateOvertimeTime(id, field, value) {
+  if (isCurrentMonthLocked()) return;
+  const item = teachersDB[currentUserId].overtimeList.find(r => r.id === id);
+  if (item) { item[field] = value; const autoH = calcSmartHours(item.startTime, item.endTime); if (autoH) item.approvedHours = autoH; renderAll(); triggerAutoSave(); }
+}
+function deleteOvertimeRow(id) {
+  if (isCurrentMonthLocked()) return;
+  teachersDB[currentUserId].overtimeList = teachersDB[currentUserId].overtimeList.filter(r => r.id !== id); renderAll(); triggerAutoSave();
+}
 
     // 差勤回報
     function renderLeaveView() {
