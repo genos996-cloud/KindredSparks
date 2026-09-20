@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>邱小民社會 ｜ 教材庫存與出貨管理系統 (Auth 版)</title>
+  <title>邱小民社會 ｜ 教材庫存與出貨管理系統</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -13,12 +13,14 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; letter-spacing: -0.01em; }
     .num-font { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
     .apple-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .apple-input { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
     .apple-input:focus { background-color: #ffffff !important; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); border-color: #6366f1 !important; outline: none; }
+    input:disabled, select:disabled { background-color: #f8fafc !important; color: #94a3b8 !important; border-color: #f1f5f9 !important; cursor: not-allowed; }
   </style>
 </head>
 <body class="bg-[#f5f5f7] text-[#1d1d1f] min-h-screen flex flex-col p-4 sm:p-6 w-full antialiased selection:bg-indigo-500 selection:text-white space-y-4">
 
-  <!-- 登入畫面 -->
+  <!-- 1. 登入畫面 -->
   <div id="auth-screen" class="hidden flex-1 flex items-center justify-center">
     <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 text-center max-w-sm w-full">
       <h2 class="text-xl font-bold mb-2">系統登入</h2>
@@ -29,7 +31,7 @@
     </div>
   </div>
 
-  <!-- 待審核畫面 -->
+  <!-- 2. 待審核畫面 -->
   <div id="pending-screen" class="hidden flex-1 flex items-center justify-center">
     <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 text-center max-w-sm w-full">
       <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -41,7 +43,7 @@
     </div>
   </div>
 
-  <!-- 主系統容器 -->
+  <!-- 3. 主系統容器 -->
   <div id="app-container" class="hidden flex-col flex-1 space-y-4">
     <!-- 頂部導覽列 -->
     <header class="w-full bg-white/80 apple-blur border border-slate-200/80 rounded-2xl px-5 py-3.5 shadow-sm">
@@ -49,43 +51,45 @@
         <div>
           <div class="flex items-center gap-2.5">
             <h1 class="text-base sm:text-lg font-bold tracking-tight text-[#1d1d1f]">邱小民社會教學團隊</h1>
-            <span class="text-[11px] font-semibold text-slate-500 tracking-wider uppercase px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200/60">Inventory</span>
+            <span class="text-[11px] font-semibold text-slate-500 tracking-wider uppercase px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200/60">Inventory DB</span>
           </div>
           <p class="text-xs text-slate-400 mt-0.5">庫存狀態機 ｜ 補寄抽屜 ｜ 權限控管</p>
         </div>
 
-        <div class="flex items-center gap-2.5 flex-wrap">
+        <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
           <!-- 登入者身分顯示 -->
           <div class="flex items-center gap-2 bg-slate-100/70 border border-slate-200/60 px-3 py-1.5 rounded-xl text-xs">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             <span id="current-user-name" class="font-semibold text-slate-800">載入中...</span>
-            <span id="current-user-role" class="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-600 uppercase">ROLE</span>
+            <span id="current-user-role" class="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-600 uppercase font-bold">ROLE</span>
           </div>
 
-          <button onclick="triggerAddReship()" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-xs">
+          <button onclick="triggerAddReship()" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-xs active:scale-95 transition-transform">
             <i data-lucide="package-plus" class="w-3.5 h-3.5 text-indigo-600"></i>
             <span>登記重寄</span>
           </button>
 
           <!-- 刪除按鈕 (僅 Admin 可用) -->
-          <button id="btn-batch-delete" onclick="batchDeleteSelected()" disabled class="hidden px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-slate-200 bg-slate-100 text-slate-400">
+          <button id="btn-batch-delete" onclick="batchDeleteSelected()" disabled class="hidden px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-slate-200 bg-slate-100 text-slate-400 active:scale-95 transition-transform">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             <span id="label-batch-delete">刪除已選</span>
           </button>
 
           <!-- 審核管理按鈕 (僅 Admin 可見) -->
-          <button id="btn-admin-panel" onclick="toggleAdminPanel()" class="hidden px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100">
+          <button id="btn-admin-panel" onclick="toggleAdminPanel()" class="hidden px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 transition-transform">
             <i data-lucide="users" class="w-3.5 h-3.5"></i>
-            <span>身分審核管理</span>
+            <span>審核管理</span>
           </button>
 
-          <button onclick="logout()" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100">登出</button>
+          <button onclick="logout()" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 active:scale-95 transition-transform">
+            登出
+          </button>
         </div>
       </div>
     </header>
 
     <!-- 隱藏：身分審核管理面板 (Admin Only) -->
-    <div id="admin-panel" class="hidden bg-white/90 border border-slate-200 rounded-2xl p-5 shadow-md">
+    <div id="admin-panel" class="hidden bg-white/90 apple-blur border border-slate-200/80 rounded-2xl p-5 shadow-sm">
       <h2 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i> 使用者身分審核與權限管理</h2>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse">
@@ -103,22 +107,22 @@
     </div>
 
     <!-- 異常備查抽屜 -->
-    <section class="w-full bg-white/90 border border-slate-200/80 rounded-2xl shadow-sm flex flex-col">
-      <div onclick="toggleDrawer('reship-drawer')" class="px-5 py-3 bg-slate-50/70 hover:bg-slate-100 cursor-pointer border-b border-transparent flex items-center justify-between" id="reship-drawer-header">
+    <section class="w-full bg-white/90 apple-blur border border-slate-200/80 rounded-2xl shadow-sm flex flex-col transition-all duration-300">
+      <div onclick="toggleDrawer('reship-drawer')" class="px-5 py-3 bg-slate-50/70 hover:bg-slate-100/70 cursor-pointer border-b border-transparent flex items-center justify-between select-none" id="reship-drawer-header">
         <div class="flex items-center gap-2.5">
           <span class="w-2 h-2 rounded-full bg-amber-500"></span>
           <h2 class="text-xs font-bold text-slate-800">教材重寄／補寄報備專區</h2>
         </div>
         <div class="flex items-center gap-1 text-slate-400 text-xs font-medium">
           <span id="reship-drawer-status">點擊展開</span>
-          <i id="reship-drawer-icon" data-lucide="chevron-down" class="w-4 h-4"></i>
+          <i id="reship-drawer-icon" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200"></i>
         </div>
       </div>
       <div id="reship-drawer" class="hidden overflow-x-auto w-full">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr class="bg-slate-50/40 text-slate-500 border-b border-slate-200 text-center">
-              <th class="p-2.5 w-10 text-center"><input type="checkbox" id="check-all-reship" onchange="toggleSelectAllReship(this.checked)" class="w-4 h-4 rounded-md"></th>
+            <tr class="bg-slate-50/40 text-slate-500 font-semibold border-b border-slate-200/60 text-center tracking-tight">
+              <th class="p-2.5 w-10 text-center"><input type="checkbox" id="check-all-reship" onchange="toggleSelectAllReship(this.checked)" class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 cursor-pointer"></th>
               <th class="p-2.5 w-12 font-mono text-[11px]">#</th>
               <th class="p-2.5 w-28">報備日期</th>
               <th class="p-2.5 text-left min-w-[200px]">原因</th>
@@ -133,7 +137,7 @@
     </section>
 
     <!-- 常態教材進銷存 -->
-    <main class="w-full bg-white/90 border border-slate-200/80 rounded-2xl shadow-sm flex flex-col flex-1">
+    <main class="w-full bg-white/90 apple-blur border border-slate-200/80 rounded-2xl shadow-sm flex flex-col flex-1">
       <div class="px-5 py-3 bg-slate-50/50 border-b border-slate-200/60 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
@@ -143,25 +147,25 @@
       <div class="overflow-x-auto w-full">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr class="bg-slate-50/75 text-slate-500 border-b border-slate-200 text-center">
-              <th class="p-3 w-10 text-center"><input type="checkbox" id="check-all-inventory" onchange="toggleSelectAllInventory(this.checked)" class="w-4 h-4 rounded-md"></th>
+            <tr class="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/60 text-center tracking-tight">
+              <th class="p-3 w-10 text-center"><input type="checkbox" id="check-all-inventory" onchange="toggleSelectAllInventory(this.checked)" class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 cursor-pointer"></th>
               <th class="p-3 w-12 font-mono text-[11px]">#</th>
               <th class="p-3 text-left min-w-[250px]">教材名稱</th>
               <th class="p-3 w-20">在庫</th>
               <th class="p-3 w-28">狀態</th>
               <th class="p-3 w-20">異動</th>
-              <th class="p-3 w-24 text-slate-800 font-bold">結算</th>
+              <th class="p-3 w-24 text-slate-800 font-bold bg-slate-50/50 border-x border-slate-200/50">結算</th>
               <th class="p-3 w-24">前次更新</th>
               <th class="p-3 w-24">本次更新</th>
               <th class="p-3 min-w-[120px]">最後經手人</th>
               <th class="p-3 w-20">判定</th>
             </tr>
           </thead>
-          <tbody id="inventory-tbody" class="divide-y divide-slate-100"></tbody>
+          <tbody id="inventory-tbody" class="divide-y divide-slate-100/80"></tbody>
         </table>
       </div>
       <div class="p-3 bg-slate-50/50 border-t border-slate-200/60">
-        <button onclick="addNewItemRow()" class="w-full py-2 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-semibold text-xs flex items-center justify-center gap-2">
+        <button onclick="addNewItemRow()" class="w-full py-2 px-4 bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-slate-300 rounded-xl text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.998]">
           <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增常態教材品項
         </button>
       </div>
@@ -169,22 +173,27 @@
   </div>
 
   <script>
+    // ✅ 確保 Supabase 初始化只宣告一次
     const supabaseUrl = 'https://dlzcbybmsckhiocbcmvm.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemNieWJtc2NraGlvY2JjbXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTU0MjQsImV4cCI6MjA5NjQ5MTQyNH0.pn2gwkLrUWgc19Gh6W9VOe52SAP4mjKMAfvVZGmoUiU';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     let currentUser = null;
     let appData = { inventory: [], reshipLogs: [] };
-    let selectedInventoryIds = new Set(), selectedReshipIds = new Set();
+    let selectedInventoryIds = new Set();
+    let selectedReshipIds = new Set();
 
+    // 畫面切換
     function showScreen(screenId) {
       ['auth-screen', 'pending-screen', 'app-container'].forEach(id => {
         document.getElementById(id).classList.add('hidden');
+        document.getElementById(id).classList.remove('flex');
       });
       document.getElementById(screenId).classList.remove('hidden');
       document.getElementById(screenId).classList.add('flex');
     }
 
+    // Google 登入與登出
     async function loginWithGoogle() {
       await supabase.auth.signInWithOAuth({ provider: 'google' });
     }
@@ -194,25 +203,31 @@
       window.location.reload();
     }
 
+    // 監聽登入狀態
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
-        if (session) checkAndSyncUser(session.user);
-        else showScreen('auth-screen');
+        if (session) {
+          checkAndSyncUser(session.user);
+        } else {
+          showScreen('auth-screen');
+        }
+      } else if (event === 'SIGNED_OUT') {
+        showScreen('auth-screen');
       }
-      if (event === 'SIGNED_OUT') showScreen('auth-screen');
     });
 
-    // 核心身分雙向綁定與驗證
+    // 驗證身分並同步到 Database Users 表
     async function checkAndSyncUser(authUser) {
-      const { data: userRec } = await supabase.from('users').select('*').eq('id', authUser.id).single();
+      const { data: userRec, error } = await supabase.from('users').select('*').eq('id', authUser.id).single();
       
       let finalUser = userRec;
+      
       if (!userRec) {
         const newUser = {
           id: authUser.id,
           email: authUser.email,
           name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
-          role: 'pending' // 預設待審核
+          role: 'pending' // 新登入者預設為待審核
         };
         const { data: inserted } = await supabase.from('users').insert([newUser]).select().single();
         finalUser = inserted;
@@ -231,6 +246,7 @@
       }
     }
 
+    // 根據身分設定 UI 權限
     function applyRolePermissions() {
       const btnDelete = document.getElementById('btn-batch-delete');
       const btnAdminPanel = document.getElementById('btn-admin-panel');
@@ -244,7 +260,7 @@
       }
     }
 
-    /* === Admin 面板功能 === */
+    // === Admin 審核面板功能 ===
     function toggleAdminPanel() {
       const panel = document.getElementById('admin-panel');
       if (panel.classList.contains('hidden')) {
@@ -264,7 +280,7 @@
           <td class="p-2 text-slate-500">${u.email}</td>
           <td class="p-2 text-slate-500 font-mono text-[11px]">${u.role}</td>
           <td class="p-2">
-            <select onchange="changeUserRole('${u.id}', this.value)" class="border rounded-lg px-2 py-1 text-xs cursor-pointer outline-none bg-white">
+            <select onchange="changeUserRole('${u.id}', this.value)" class="border border-slate-200 rounded-lg px-2 py-1 text-xs cursor-pointer outline-none bg-white">
               <option value="pending" ${u.role === 'pending' ? 'selected' : ''}>Pending (待審核)</option>
               <option value="user" ${u.role === 'user' ? 'selected' : ''}>User (一般用戶)</option>
               <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin (管理員)</option>
@@ -276,11 +292,14 @@
 
     async function changeUserRole(userId, newRole) {
       await supabase.from('users').update({ role: newRole }).eq('id', userId);
-      loadAdminUsers(); // 重新整理列表
-      if(userId === currentUser.id) window.location.reload(); // 如果改到自己，重整頁面
+      loadAdminUsers(); 
+      if (userId === currentUser.id) {
+        alert("您已變更自己的權限，頁面將重新整理。");
+        window.location.reload(); 
+      }
     }
 
-    /* === 原始業務邏輯 (綁定 currentUser) === */
+    // === 業務邏輯與資料庫操作 ===
     function getTaipeiDate() {
       return new Date().toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
     }
@@ -296,25 +315,42 @@
     function toggleDrawer(drawerId, forceOpen = false) {
       const drawer = document.getElementById(drawerId);
       const icon = document.getElementById('reship-drawer-icon');
+      const statusText = document.getElementById('reship-drawer-status');
       if (forceOpen || drawer.classList.contains('hidden')) {
         drawer.classList.remove('hidden');
         icon.style.transform = 'rotate(180deg)';
+        statusText.textContent = '點擊收起';
       } else {
         drawer.classList.add('hidden');
         icon.style.transform = 'rotate(0deg)';
+        statusText.textContent = '點擊展開';
       }
     }
 
     async function triggerAddReship() {
       toggleDrawer('reship-drawer', true);
-      const newLog = { report_date: getTaipeiDate(), reason: '', content: '', books_count: 1, operator_id: currentUser.name };
+      const newLog = { 
+        report_date: getTaipeiDate(), 
+        reason: '', 
+        content: '', 
+        books_count: 1, 
+        operator_id: currentUser.name 
+      };
       await supabase.from('reship_logs').insert([newLog]);
       await loadData();
     }
 
     async function addNewItemRow() {
       const today = getTaipeiDate();
-      const newItem = { title: '', base_stock: 0, state: 'NONE', qty: 0, prev_date: today, last_date: today, operator_id: currentUser.name };
+      const newItem = { 
+        title: '', 
+        base_stock: 0, 
+        state: 'NONE', 
+        qty: 0, 
+        prev_date: today, 
+        last_date: today, 
+        operator_id: currentUser.name 
+      };
       await supabase.from('inventory_items').insert([newItem]);
       await loadData();
     }
@@ -322,47 +358,70 @@
     async function updateInventory(id, field, value) {
       const item = appData.inventory.find(r => r.id === id);
       if (!item) return;
+      
       let updateData = { operator_id: currentUser.name };
       const today = getTaipeiDate();
-      if (item.last_date !== today) { updateData.prev_date = item.last_date || today; updateData.last_date = today; }
-      if (field === 'state') { updateData.state = value; if (value === 'NONE') updateData.qty = 0; }
-      else if (field === 'qty' || field === 'base_stock') updateData[field] = Math.max(0, parseInt(value) || 0);
-      else updateData[field] = value;
+      
+      if (item.last_date !== today) { 
+        updateData.prev_date = item.last_date || today; 
+        updateData.last_date = today; 
+      }
+      
+      if (field === 'state') { 
+        updateData.state = value; 
+        if (value === 'NONE') updateData.qty = 0; 
+      } else if (field === 'qty' || field === 'base_stock') {
+        updateData[field] = Math.max(0, parseInt(value) || 0);
+      } else {
+        updateData[field] = value;
+      }
+      
       await supabase.from('inventory_items').update(updateData).eq('id', id);
       await loadData();
     }
 
     async function updateReship(id, field, value) {
-      let updateData = {};
+      let updateData = { operator_id: currentUser.name };
       updateData[field] = field === 'books_count' ? Math.max(1, parseInt(value) || 1) : value;
       await supabase.from('reship_logs').update(updateData).eq('id', id);
       await loadData();
     }
 
+    // 刪除邏輯 (僅 Admin)
     async function batchDeleteSelected() {
-      if (currentUser.role !== 'admin') return; // 雙重保護
+      if (currentUser.role !== 'admin') return; 
+      
       const total = selectedInventoryIds.size + selectedReshipIds.size;
       if (total === 0) return;
+      
       if (confirm(`確定要刪除所有已勾選的 ${total} 筆項目嗎？`)) {
-        if (selectedInventoryIds.size > 0) { await supabase.from('inventory_items').delete().in('id', Array.from(selectedInventoryIds)); selectedInventoryIds.clear(); }
-        if (selectedReshipIds.size > 0) { await supabase.from('reship_logs').delete().in('id', Array.from(selectedReshipIds)); selectedReshipIds.clear(); }
+        if (selectedInventoryIds.size > 0) { 
+          await supabase.from('inventory_items').delete().in('id', Array.from(selectedInventoryIds)); 
+          selectedInventoryIds.clear(); 
+        }
+        if (selectedReshipIds.size > 0) { 
+          await supabase.from('reship_logs').delete().in('id', Array.from(selectedReshipIds)); 
+          selectedReshipIds.clear(); 
+        }
         await loadData();
       }
     }
 
+    // UI Checkbox 處理
     function toggleSelectInventory(id, checked) { checked ? selectedInventoryIds.add(id) : selectedInventoryIds.delete(id); updateBatchUI(); }
     function toggleSelectAllInventory(checked) { checked ? appData.inventory.forEach(i => selectedInventoryIds.add(i.id)) : selectedInventoryIds.clear(); updateBatchUI(); renderInventoryTable(); }
     function toggleSelectReship(id, checked) { checked ? selectedReshipIds.add(id) : selectedReshipIds.delete(id); updateBatchUI(); }
     function toggleSelectAllReship(checked) { checked ? appData.reshipLogs.forEach(i => selectedReshipIds.add(i.id)) : selectedReshipIds.clear(); updateBatchUI(); renderReshipTable(); }
 
     function updateBatchUI() {
-      if (currentUser?.role !== 'admin') return;
       const btn = document.getElementById('btn-batch-delete');
       const label = document.getElementById('label-batch-delete');
+      if (currentUser?.role !== 'admin') return;
+      
       const total = selectedInventoryIds.size + selectedReshipIds.size;
       if (total > 0) {
         btn.disabled = false;
-        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-rose-200 bg-rose-500 text-white shadow-xs';
+        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-rose-200 bg-rose-500 text-white shadow-xs active:scale-95 transition-transform cursor-pointer';
         label.textContent = `刪除已選 (${total})`;
       } else {
         btn.disabled = true;
@@ -376,26 +435,28 @@
       return item.state === 'IN' ? base + q : item.state === 'OUT' ? Math.max(0, base - q) : base;
     }
 
+    // 渲染表格
     function renderInventoryTable() {
-      document.getElementById('inventory-tbody').innerHTML = appData.inventory.map((item, index) => {
+      const tbody = document.getElementById('inventory-tbody');
+      tbody.innerHTML = appData.inventory.map((item, index) => {
         const finalStock = calcFinalStock(item), isAlert = finalStock < 10, isChecked = selectedInventoryIds.has(item.id);
-        const checkboxState = currentUser.role === 'admin' ? '' : 'disabled class="opacity-50 cursor-not-allowed w-4 h-4"';
+        const checkboxState = currentUser.role === 'admin' ? '' : 'disabled class="opacity-50 cursor-not-allowed w-4 h-4 rounded-md"';
         const checkboxClass = currentUser.role === 'admin' ? 'class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer"' : '';
         return `
           <tr class="transition-colors ${isChecked ? 'bg-indigo-50/40' : 'hover:bg-slate-50/60'}">
             <td class="p-3 text-center"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectInventory('${item.id}', this.checked)" ${checkboxState} ${checkboxClass}></td>
             <td class="p-3 text-center text-slate-400 font-mono text-[11px]">${index + 1}</td>
             <td class="p-3"><input type="text" value="${item.title || ''}" placeholder="請輸入名稱" onchange="updateInventory('${item.id}', 'title', this.value)" class="apple-input w-full bg-transparent font-medium border border-transparent hover:border-slate-200 rounded-lg px-2 py-1 text-xs"></td>
-            <td class="p-3 text-right"><input type="number" min="0" value="${item.base_stock}" onchange="updateInventory('${item.id}', 'base_stock', this.value)" class="apple-input w-16 text-right bg-transparent font-semibold border border-transparent hover:border-slate-200 rounded-lg px-2 py-1 text-xs"></td>
+            <td class="p-3 text-right"><input type="number" min="0" value="${item.base_stock}" onchange="updateInventory('${item.id}', 'base_stock', this.value)" class="apple-input w-16 text-right bg-transparent font-semibold border border-transparent hover:border-slate-200 rounded-lg px-2 py-1 text-xs num-font"></td>
             <td class="p-3 text-center">
-              <select onchange="updateInventory('${item.id}', 'state', this.value)" class="border rounded-lg px-2 py-1 font-semibold text-xs outline-none ${item.state === 'IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : item.state === 'OUT' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-500 border-slate-200'}">
+              <select onchange="updateInventory('${item.id}', 'state', this.value)" class="border rounded-lg px-2 py-1 font-semibold text-xs outline-none cursor-pointer ${item.state === 'IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : item.state === 'OUT' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-500 border-slate-200'}">
                 <option value="NONE" ${item.state === 'NONE' ? 'selected' : ''}>無 (維持)</option>
                 <option value="IN" ${item.state === 'IN' ? 'selected' : ''}>進 (+)</option>
                 <option value="OUT" ${item.state === 'OUT' ? 'selected' : ''}>銷 (-)</option>
               </select>
             </td>
-            <td class="p-3 text-center"><input type="number" min="0" value="${item.qty}" ${item.state === 'NONE' ? 'disabled' : ''} onchange="updateInventory('${item.id}', 'qty', this.value)" class="apple-input w-14 text-center border border-slate-200 rounded-lg px-1 py-1 font-semibold text-xs ${item.state === 'NONE' ? '' : 'bg-white'}"></td>
-            <td class="p-3 text-center bg-slate-50/40 font-bold ${isAlert ? 'text-rose-600' : 'text-slate-900'}">${finalStock}</td>
+            <td class="p-3 text-center"><input type="number" min="0" value="${item.qty}" ${item.state === 'NONE' ? 'disabled' : ''} onchange="updateInventory('${item.id}', 'qty', this.value)" class="apple-input w-14 text-center border border-slate-200 rounded-lg px-1 py-1 font-semibold text-xs num-font ${item.state === 'NONE' ? '' : 'bg-white shadow-sm'}"></td>
+            <td class="p-3 text-center bg-slate-50/40 border-x border-slate-200/50 font-bold num-font ${isAlert ? 'text-rose-600' : 'text-slate-900'}">${finalStock}</td>
             <td class="p-3 text-center text-slate-400 font-mono text-[11px]">${item.prev_date || '-'}</td>
             <td class="p-3 text-center font-mono text-[11px] font-semibold text-slate-700">${item.last_date || '-'}</td>
             <td class="p-3 text-center"><span class="inline-block font-medium text-[11px] text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">${item.operator_id || '系統'}</span></td>
@@ -406,19 +467,22 @@
 
     function renderReshipTable() {
       const tbody = document.getElementById('reship-tbody');
-      if (appData.reshipLogs.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-xs text-slate-400">暫無重寄或補寄紀錄。</td></tr>`; return; }
+      if (appData.reshipLogs.length === 0) { 
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-xs text-slate-400">暫無重寄或補寄紀錄。</td></tr>`; 
+        return; 
+      }
       tbody.innerHTML = appData.reshipLogs.map((log, index) => {
         const isChecked = selectedReshipIds.has(log.id);
-        const checkboxState = currentUser.role === 'admin' ? '' : 'disabled class="opacity-50 cursor-not-allowed w-4 h-4"';
+        const checkboxState = currentUser.role === 'admin' ? '' : 'disabled class="opacity-50 cursor-not-allowed w-4 h-4 rounded-md"';
         const checkboxClass = currentUser.role === 'admin' ? 'class="w-4 h-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer"' : '';
         return `
           <tr class="transition-colors ${isChecked ? 'bg-indigo-50/40' : 'hover:bg-slate-50/60'}">
             <td class="p-2.5 text-center"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectReship('${log.id}', this.checked)" ${checkboxState} ${checkboxClass}></td>
             <td class="p-2.5 text-center text-slate-400 font-mono text-[11px]">${index + 1}</td>
             <td class="p-2.5 text-center font-mono text-xs"><input type="date" value="${log.report_date}" onchange="updateReship('${log.id}', 'report_date', this.value)" class="apple-input bg-transparent border border-transparent hover:border-slate-200 rounded px-1 py-0.5 text-xs text-center"></td>
-            <td class="p-2.5"><input type="text" value="${log.reason || ''}" placeholder="請簡述原因" onchange="updateReship('${log.id}', 'reason', this.value)" class="apple-input w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs"></td>
-            <td class="p-2.5"><input type="text" value="${log.content || ''}" placeholder="請填寫內容" onchange="updateReship('${log.id}', 'content', this.value)" class="apple-input w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs"></td>
-            <td class="p-2.5 text-center"><input type="number" min="1" value="${log.books_count || 1}" onchange="updateReship('${log.id}', 'books_count', this.value)" class="apple-input w-12 text-center bg-white border border-slate-200 rounded px-1 py-1 text-xs font-bold text-indigo-700"></td>
+            <td class="p-2.5"><input type="text" value="${log.reason || ''}" placeholder="請簡述原因" onchange="updateReship('${log.id}', 'reason', this.value)" class="apple-input w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 text-xs"></td>
+            <td class="p-2.5"><input type="text" value="${log.content || ''}" placeholder="請填寫內容" onchange="updateReship('${log.id}', 'content', this.value)" class="apple-input w-full bg-white border border-slate-200/80 rounded-lg px-2.5 py-1 text-xs"></td>
+            <td class="p-2.5 text-center"><input type="number" min="1" value="${log.books_count || 1}" onchange="updateReship('${log.id}', 'books_count', this.value)" class="apple-input w-14 text-center bg-white border border-slate-200/80 rounded-lg px-1 py-1 text-xs font-bold text-indigo-700 num-font"></td>
             <td class="p-2.5 text-center"><span class="inline-block font-medium text-[11px] text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">${log.operator_id}</span></td>
           </tr>`;
       }).join('');
