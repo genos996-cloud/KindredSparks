@@ -256,12 +256,24 @@
         </main>
     </div>
 
-    <!-- 管理員審核面板 -->
+    <!-- 管理員審核面板（完整下拉式選單版） -->
     <div id="modalUserApproval" class="fixed inset-0 bg-slate-900/30 backdrop-blur-md hidden flex items-center justify-center z-50">
         <div class="panel-3d p-8 w-full max-w-2xl flex flex-col max-h-[80vh] shadow-2xl">
-            <div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-black text-slate-800">👥 系統使用者審核面板</h3><button onclick="document.getElementById('modalUserApproval').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold bg-slate-100 w-8 h-8 rounded-full transition-colors">&times;</button></div>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-slate-800">👥 系統使用者審核面板</h3>
+                <button onclick="document.getElementById('modalUserApproval').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold bg-slate-100 w-8 h-8 rounded-full transition-colors">&times;</button>
+            </div>
             <div class="overflow-y-auto flex-1 pr-2 no-scrollbar rounded-xl border border-slate-200/60">
-                <table class="w-full text-left text-sm"><thead class="bg-slate-100/50 text-slate-500 font-bold border-b border-slate-200 sticky top-0 backdrop-blur-sm"><tr><th class="p-4">系統顯示名稱</th><th class="p-4">登入 Email</th><th class="p-4 text-center">目前狀態</th><th class="p-4 text-center">權限操作</th></tr></thead><tbody id="approvalTableBody" class="divide-y divide-slate-100 bg-white"></tbody></table>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-100/50 text-slate-500 font-bold border-b border-slate-200 sticky top-0 backdrop-blur-sm">
+                        <tr>
+                            <th class="p-4">系統顯示名稱</th>
+                            <th class="p-4">登入 Email</th>
+                            <th class="p-4 text-center">切換權限 (自動同步)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvalTableBody" class="divide-y divide-slate-100 bg-white"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -583,7 +595,7 @@
             // 抓出登入者在 teachers 表中的資料
             const myProfile = rawTeachers.find(t => t.id === currentUserId);
             
-            // 關鍵修改：兼職 (part_time) 與外聘 (external) 均啟動隔離結界，只看見自己
+            // 兼職 (part_time) 與外聘 (external) 啟動隔離結界，只看見自己
             isPersonalView = (myProfile && (myProfile.type === 'part_time' || myProfile.type === 'external'));
             
             if (isPersonalView) {
@@ -624,20 +636,32 @@
             document.getElementById('loadingOverlay').classList.add('hidden'); renderGrid();
         }
 
-        // ================= 員工權限審核與快速更名 =================
+        // ================= 員工權限審核（下拉選單版） =================
         async function openUserApprovalModal() {
-            const { data: allUsers } = await supabaseClient.from('users').select('*');
-            const tbody = document.getElementById('approvalTableBody'); tbody.innerHTML = '';
+            const { data: allUsers } = await supabaseClient.from('users').select('*').order('created_at', { ascending: false });
+            const tbody = document.getElementById('approvalTableBody'); 
+            tbody.innerHTML = '';
+            
             allUsers.forEach(u => {
-                let statusText = "", statusColor = "";
-                if(u.role === 'admin') { statusText = "管理員"; statusColor = "bg-indigo-100 text-indigo-700"; }
-                else if(u.role === 'user') { statusText = "內部核心"; statusColor = "bg-emerald-100 text-emerald-700"; }
-                else if(u.role === 'pending') { statusText = "等待審核"; statusColor = "bg-amber-100 text-amber-700 font-black animate-pulse"; }
-                else if(u.role === 'rejected') { statusText = "已黑名單"; statusColor = "bg-red-100 text-red-700"; }
-                
-                const nameDisplay = `<div class="flex items-center gap-2"><span class="${u.name ? '' : 'text-red-500'}">${u.name || '未填寫/null'}</span><button onclick="quickRename('${u.id}', '${u.name || ''}')" class="text-slate-400 hover:text-indigo-600 text-sm font-black transition-colors" title="快速修改名稱">✎</button></div>`;
+                const nameDisplay = `<div class="flex items-center gap-2">
+                    <span class="${u.name ? 'font-bold text-slate-800' : 'text-rose-500 font-bold'}">${u.name || '未填寫/null'}</span>
+                    <button onclick="quickRename('${u.id}', '${u.name || ''}')" class="text-slate-400 hover:text-indigo-600 text-sm font-black transition-colors" title="快速修改名稱">✎</button>
+                </div>`;
 
-                tbody.innerHTML += `<tr class="hover:bg-slate-50 transition"><td class="p-4 font-bold text-slate-800">${nameDisplay}</td><td class="p-4 font-mono text-xs text-slate-500">${u.email}</td><td class="p-4 text-center"><span class="px-2.5 py-1 rounded-md text-xs font-bold ${statusColor}">${statusText}</span></td><td class="p-4 text-center flex justify-center gap-2"><button onclick="changeUserRole('${u.id}', 'user', '${u.name}')" class="px-3 py-1.5 text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg shadow-sm transition">授權內部</button><button onclick="changeUserRole('${u.id}', 'admin', '${u.name}')" class="px-3 py-1.5 text-xs font-bold bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg shadow-sm transition">升管理員</button><button onclick="changeUserRole('${u.id}', 'rejected', '${u.name}')" class="px-3 py-1.5 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg transition">黑名單</button></td></tr>`;
+                tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="p-4">${nameDisplay}</td>
+                    <td class="p-4 font-mono text-xs text-slate-500">${u.email}</td>
+                    <td class="p-4 text-center">
+                        <select onchange="changeUserRole('${u.id}', this.value, '${u.name || ''}')" class="input-inset border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 bg-white cursor-pointer shadow-sm focus:border-indigo-500">
+                            <option value="pending" ${u.role === 'pending' ? 'selected' : ''}>⏳ Pending (待審核)</option>
+                            <option value="user" ${u.role === 'user' ? 'selected' : ''}>👔 內部核心 (user)</option>
+                            <option value="part_time" ${u.role === 'part_time' ? 'selected' : ''}>⏱️ 兼職人員 (part_time)</option>
+                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>👑 管理員 (admin)</option>
+                            <option value="rejected" ${u.role === 'rejected' ? 'selected' : ''}>🚫 黑名單 (rejected)</option>
+                        </select>
+                    </td>
+                </tr>`;
             });
             document.getElementById('modalUserApproval').classList.remove('hidden');
         }
@@ -655,14 +679,36 @@
         }
 
         async function changeUserRole(userId, newRole, userName) {
-            if(confirm(`確定變更 [${userName}] 權限為 [${newRole}] 嗎？`)) {
-                await supabaseClient.from('users').update({ role: newRole }).eq('id', userId);
-                if(newRole === 'user' || newRole === 'admin') {
-                    const { data: existTeacher } = await supabaseClient.from('teachers').select('*').eq('id', userId).maybeSingle();
-                    if(!existTeacher) { await supabaseClient.from('teachers').insert({ id: userId, name: userName, type: 'fulltime', start_date: new Date().toISOString().split('T')[0], hourly_rate: 0 }); }
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            // 1. 更新 users 資料表身分
+            await supabaseClient.from('users').update({ role: newRole }).eq('id', userId);
+            
+            // 2. 對接 teachers 資料表，確保兼職/內部對應相應的排課模式
+            if (newRole === 'user' || newRole === 'admin' || newRole === 'part_time') {
+                const { data: existTeacher } = await supabaseClient.from('teachers').select('*').eq('id', userId).maybeSingle();
+                
+                const teacherType = (newRole === 'part_time') ? 'part_time' : 'fulltime';
+
+                if (!existTeacher) {
+                    await supabaseClient.from('teachers').insert({
+                        id: userId,
+                        name: userName || '未命名',
+                        type: teacherType,
+                        start_date: new Date().toISOString().split('T')[0],
+                        hourly_rate: (newRole === 'part_time' ? 200 : 0)
+                    });
+                } else {
+                    await supabaseClient.from('teachers').update({ type: teacherType }).eq('id', userId);
                 }
-                openUserApprovalModal(); await loadDataFromDB();
             }
+            
+            if (userId === currentUserId) {
+                currentUserRole = newRole;
+            }
+
+            await loadDataFromDB();
+            openUserApprovalModal();
         }
 
         // ================= 網格渲染 =================
