@@ -592,7 +592,6 @@
             
             rawTeachers.sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, {numeric: true}));
             
-            // 抓出登入者在 teachers 表中的資料
             const myProfile = rawTeachers.find(t => t.id === currentUserId);
             
             // 兼職 (part_time) 與外聘 (external) 啟動隔離結界，只看見自己
@@ -636,7 +635,7 @@
             document.getElementById('loadingOverlay').classList.add('hidden'); renderGrid();
         }
 
-        // ================= 員工權限審核（修復彈出與切換邏輯） =================
+        // ================= 員工權限審核（修復版：移除 created_at 排序） =================
         function closeUserApprovalModal() {
             document.getElementById('modalUserApproval').style.display = 'none';
         }
@@ -648,10 +647,12 @@
             const tbody = document.getElementById('approvalTableBody'); 
             tbody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-400 font-bold">載入使用者名單中...</td></tr>';
 
-            const { data: allUsers, error } = await supabaseClient.from('users').select('*').order('created_at', { ascending: false });
+            // 修正：直接抓取 users，移除不存在的 created_at
+            const { data: allUsers, error } = await supabaseClient.from('users').select('*');
             
             if (error || !allUsers) {
-                tbody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-rose-500 font-bold">無法讀取使用者資料表，請檢查 Supabase 連線</td></tr>';
+                console.error("Supabase 讀取錯誤：", error);
+                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-rose-500 font-bold">讀取失敗：${error ? error.message : '未知錯誤'}</td></tr>`;
                 return;
             }
 
