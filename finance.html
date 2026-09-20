@@ -401,7 +401,7 @@
       const currentYear = now.getFullYear();
       const currentMonthIndex = now.getMonth() + 1;
 
-      // 計算自 2026年9月 到目前當月共幾個月
+      // 計算自 2026年9月 到目前當月共經歷幾個月
       const totalMonths = (currentYear - startYear) * 12 + (currentMonthIndex - startMonth);
       const monthsCount = Math.max(0, totalMonths);
 
@@ -479,7 +479,7 @@
       const teacherSelect = document.getElementById('teacherSelect');
       teacherSelect.innerHTML = '';
       allUsers.forEach(u => {
-        let displayRole = u.role === 'admin' ? '管理員' : (u.role === 'part_time' ? '兼職' : '正職');
+        let displayRole = u.role === 'admin' ? '管理員' : (u.role === 'part_time' ? '兼職' : '內部');
         teacherSelect.innerHTML += `<option value="${u.id}">${u.name} (${displayRole})</option>`;
         
         if (!teachersDB[u.id]) {
@@ -571,7 +571,7 @@
           <td class="p-2">
             <select onchange="changeUserRole('${u.id}', this.value)" class="border border-slate-200 rounded px-2 py-1 text-xs outline-none bg-white">
               <option value="pending" ${u.role === 'pending' ? 'selected' : ''}>Pending (待審核)</option>
-              <option value="user" ${u.role === 'user' ? 'selected' : ''}>User (正職)</option>
+              <option value="user" ${u.role === 'user' ? 'selected' : ''}>User (內部)</option>
               <option value="part_time" ${u.role === 'part_time' ? 'selected' : ''}>Part-Time (兼職)</option>
               <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin (管理員)</option>
             </select>
