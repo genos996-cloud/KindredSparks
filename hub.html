@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邱小民社會夥伴系統 | 內部入口核心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #050508;
+            color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro TC", "Helvetica Neue", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        #neural-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 2rem;
+        }
+
+        .header-content {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            animation: fadeInDown 1.2s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-25px); filter: blur(6px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: saturate(180%) blur(24px);
+            -webkit-backdrop-filter: saturate(180%) blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            border-radius: 28px; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1; 
+            position: relative;
+            padding: 2rem 1.5rem;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+            z-index: 20;
+        }
+
+        .icon-base {
+            transition: all 0.35s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 22px;
+        }
+
+        /* 1. 智能課表 (Indigo) */
+        .card-course .icon-base { background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.25); color: #818cf8; }
+        .card-course:hover .icon-base { background: rgba(99, 102, 241, 0.28); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.35); transform: scale(1.08); }
+        .card-course:hover h3 { color: #a5b4fc; }
+
+        /* 2. 薪資差勤 (Violet) */
+        .card-finance .icon-base { background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc; }
+        .card-finance:hover .icon-base { background: rgba(168, 85, 247, 0.28); box-shadow: 0 10px 30px rgba(168, 85, 247, 0.35); transform: scale(1.08); }
+        .card-finance:hover h3 { color: #e9d5ff; }
+
+        /* 3. 教材庫存 (Emerald) */
+        .card-inventory .icon-base { background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; }
+        .card-inventory:hover .icon-base { background: rgba(16, 185, 129, 0.28); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.35); transform: scale(1.08); }
+        .card-inventory:hover h3 { color: #6ee7b7; }
+
+        /* 4. 教材寄送 (Sky) */
+        .card-delivery .icon-base { background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.25); color: #38bdf8; }
+        .card-delivery:hover .icon-base { background: rgba(14, 165, 233, 0.28); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.35); transform: scale(1.08); }
+        .card-delivery:hover h3 { color: #7dd3fc; }
+
+        .status-dot {
+            position: absolute;
+            top: 12%;
+            right: 12%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #38bdf8;
+            box-shadow: 0 0 12px #38bdf8;
+            opacity: 0.85;
+            animation: pulse 2.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.3); opacity: 0.35; }
+            100% { transform: scale(1); opacity: 0.85; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+    <canvas id="neural-canvas"></canvas>
+
+    <!-- 1. 登入畫面 -->
+    <div id="authScreen" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xl p-4">
+        <div class="glass-card max-w-sm w-full p-8 border border-white/10 !aspect-auto text-center">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-graduation-cap text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white mb-2">邱小民社會夥伴系統</h2>
+            <p class="text-xs text-slate-400 mb-8 font-medium tracking-wider">請使用已授權的 Google 帳號驗證身分</p>
+            <button onclick="loginWithGoogle()" class="w-full py-3.5 bg-white text-slate-900 font-bold rounded-xl shadow-lg hover:bg-slate-100 transition-all active:scale-[0.98] flex items-center justify-center gap-3 text-sm">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Google 驗證登入
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. 待審核畫面 -->
+    <div id="pendingScreen" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xl p-4">
+        <div class="glass-card max-w-sm w-full p-8 border border-white/10 !aspect-auto text-center">
+            <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-hourglass-half text-3xl animate-pulse"></i>
+            </div>
+            <h2 class="text-xl font-bold text-white mb-2">權限待審核</h2>
+            <p class="text-xs text-slate-400 mb-8 leading-relaxed">您的帳號已記錄。<br>請聯繫系統管理員為您開通權限。</p>
+            <button onclick="logout()" class="text-xs text-indigo-400 hover:underline">登出 / 切換帳號</button>
+        </div>
+    </div>
+
+    <!-- 3. 主系統大廳 -->
+    <div id="portalContainer" class="hidden content-wrapper">
+        <div class="header-content w-full">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <span class="text-xs text-slate-400 font-mono tracking-widest uppercase bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+                    <span id="displayUserName" class="text-white font-bold">載入中...</span>
+                    <span class="text-slate-600 mx-1.5">•</span>
+                    <span id="displayUserRole" class="text-indigo-400 font-bold">ROLE</span>
+                </span>
+                <button onclick="logout()" class="text-xs text-slate-500 hover:text-rose-400 transition-colors p-1" title="登出">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+            <h2 class="text-slate-400 text-xs md:text-sm font-bold tracking-[0.45em] uppercase mb-3">
+                Team Workspace & Operations
+            </h2>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 drop-shadow-2xl">
+                邱小民社會夥伴系統
+            </h1>
+        </div>
+
+        <!-- 磚塊渲染區 (JS 依身分動態產生) -->
+        <main id="portalGrid" class="w-full max-w-[76rem] mx-auto px-4">
+            <!-- 動態生成磚塊 -->
+        </main>
+        
+        <footer class="mt-14 text-slate-500 text-xs tracking-widest font-bold font-mono uppercase">
+            Partner Portal • High Assurance Node
+        </footer>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://dlzcbybmsckhiocbcmvm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemNieWJtc2NraGlvY2JjbXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTU0MjQsImV4cCI6MjA5NjQ5MTQyNH0.pn2gwkLrUWgc19Gh6W9VOe52SAP4mjKMAfvVZGmoUiU';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 四大系統定義
+        const TILES = {
+            course: `
+                <a href="https://kindred-sparks.vercel.app/course.html" class="glass-card card-course group w-full">
+                    <div class="status-dot"></div>
+                    <div class="w-16 h-16 md:w-20 md:h-20 icon-base mb-5">
+                        <i class="fa-solid fa-calendar-check text-2xl md:text-3xl drop-shadow-md"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-200 tracking-wider transition-colors duration-300">課表系統</h3>
+                    <span class="text-[11px] text-slate-500 font-mono mt-1 tracking-wider uppercase">Course Scheduling</span>
+                </a>`,
+            finance: `
+                <a href="https://kindred-sparks.vercel.app/finance.html" class="glass-card card-finance group w-full">
+                    <div class="status-dot"></div>
+                    <div class="w-16 h-16 md:w-20 md:h-20 icon-base mb-5">
+                        <i class="fa-solid fa-file-invoice-dollar text-2xl md:text-3xl drop-shadow-md"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-200 tracking-wider transition-colors duration-300">薪資差勤</h3>
+                    <span class="text-[11px] text-slate-500 font-mono mt-1 tracking-wider uppercase">Payroll & Attendance</span>
+                </a>`,
+            inventory: `
+                <a href="https://kindred-sparks.vercel.app/index.html" class="glass-card card-inventory group w-full">
+                    <div class="status-dot"></div>
+                    <div class="w-16 h-16 md:w-20 md:h-20 icon-base mb-5">
+                        <i class="fa-solid fa-boxes-stacked text-2xl md:text-3xl drop-shadow-md"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-200 tracking-wider transition-colors duration-300">教材庫存</h3>
+                    <span class="text-[11px] text-slate-500 font-mono mt-1 tracking-wider uppercase">Materials Inventory</span>
+                </a>`,
+            delivery: `
+                <a href="https://book-shipping.vercel.app/" class="glass-card card-delivery group w-full">
+                    <div class="status-dot"></div>
+                    <div class="w-16 h-16 md:w-20 md:h-20 icon-base mb-5">
+                        <i class="fa-solid fa-truck-fast text-2xl md:text-3xl drop-shadow-md"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-200 tracking-wider transition-colors duration-300">教材寄送</h3>
+                    <span class="text-[11px] text-slate-500 font-mono mt-1 tracking-wider uppercase">Shipping & Logistics</span>
+                </a>`
+        };
+
+        async function loginWithGoogle() {
+            await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.reload();
+        }
+
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                initUser(session.user);
+            } else {
+                showView('authScreen');
+            }
+        });
+
+        function showView(viewId) {
+            ['authScreen', 'pendingScreen', 'portalContainer'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        async function initUser(authUser) {
+            const { data: userRec } = await supabaseClient.from('users').select('*').eq('id', authUser.id).maybeSingle();
+            
+            let userRole = 'pending';
+            let userName = authUser.user_metadata?.full_name || authUser.email.split('@')[0];
+
+            if (!userRec) {
+                const newUser = {
+                    id: authUser.id,
+                    email: authUser.email,
+                    name: userName,
+                    role: 'pending'
+                };
+                await supabaseClient.from('users').insert([newUser]);
+            } else {
+                userRole = userRec.role;
+                userName = userRec.name || userName;
+            }
+
+            if (userRole === 'pending' || userRole === 'rejected') {
+                showView('pendingScreen');
+                return;
+            }
+
+            // 身分驗證通過，進入大廳渲染
+            showView('portalContainer');
+            document.getElementById('displayUserName').textContent = userName;
+            
+            const roleLabels = { admin: '管理員', user: '內部核心', part_time: '兼職夥伴' };
+            document.getElementById('displayUserRole').textContent = roleLabels[userRole] || userRole;
+
+            const grid = document.getElementById('portalGrid');
+
+            // 兼職人員：只渲染 2 塊磚 (課表 + 薪資)
+            if (userRole === 'part_time') {
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8 max-w-2xl mx-auto px-4";
+                grid.innerHTML = TILES.course + TILES.finance;
+            } 
+            // 內部人員 / 管理員：完整渲染 4 塊磚
+            else {
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 w-full max-w-[76rem] mx-auto px-4";
+                grid.innerHTML = TILES.course + TILES.finance + TILES.inventory + TILES.delivery;
+            }
+        }
+
+        // ====== 神經突觸動畫背景 ======
+        const canvas = document.getElementById('neural-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, nodes = [], signals = [];
+        const connectionDistance = 150;
+        const nodeCountFactor = 11000;
+        let mouse = { x: -1000, y: -1000, radius: 220 };
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+        class Node {
+            constructor() {
+                this.x = Math.random() * w; this.y = Math.random() * h;
+                this.vx = (Math.random() - 0.5) * 0.4; this.vy = (Math.random() - 0.5) * 0.4;
+                this.radius = Math.random() * 1.5 + 0.6; this.neighbors = [];
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0 || this.x > w) this.vx *= -1;
+                if (this.y < 0 || this.y > h) this.vy *= -1;
+                let dx = mouse.x - this.x, dy = mouse.y - this.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < mouse.radius) {
+                    this.x += dx * 0.005; this.y += dy * 0.005;
+                    if (Math.random() < 0.05 && this.neighbors.length > 0) {
+                        let target = this.neighbors[Math.floor(Math.random() * this.neighbors.length)];
+                        signals.push(new Signal(this, target));
+                    }
+                }
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(129, 140, 248, 0.45)'; ctx.fill();
+            }
+        }
+
+        class Signal {
+            constructor(source, target) {
+                this.source = source; this.target = target; this.progress = 0;
+                this.speed = Math.random() * 0.025 + 0.015;
+                this.color = Math.random() > 0.5 ? '#818cf8' : '#c084fc';
+            }
+            update(index) {
+                this.progress += this.speed;
+                if (this.progress >= 1) { signals.splice(index, 1); return; }
+                let currentX = this.source.x + (this.target.x - this.source.x) * this.progress;
+                let currentY = this.source.y + (this.target.y - this.source.y) * this.progress;
+                ctx.beginPath(); ctx.arc(currentX, currentY, 2.2, 0, Math.PI * 2);
+                ctx.fillStyle = this.color; ctx.shadowBlur = 10; ctx.shadowColor = this.color; ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initCanvas() {
+            resize(); nodes = []; signals = [];
+            let numNodes = Math.floor((w * h) / nodeCountFactor);
+            for (let i = 0; i < numNodes; i++) nodes.push(new Node());
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.28)'; ctx.fillRect(0, 0, w, h);
+            for (let i = 0; i < nodes.length; i++) {
+                nodes[i].neighbors = []; nodes[i].update();
+                for (let j = i + 1; j < nodes.length; j++) {
+                    let dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < connectionDistance) {
+                        nodes[i].neighbors.push(nodes[j]); nodes[j].neighbors.push(nodes[i]);
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(129, 140, 248, ${0.14 - (dist / connectionDistance) * 0.14})`;
+                        ctx.lineWidth = 0.5; ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
+                    }
+                }
+                if (Math.random() < 0.0012 && nodes[i].neighbors.length > 0) {
+                    let target = nodes[i].neighbors[Math.floor(Math.random() * nodes[i].neighbors.length)];
+                    signals.push(new Signal(nodes[i], target));
+                }
+            }
+            for (let i = signals.length - 1; i >= 0; i--) signals[i].update(i);
+            requestAnimationFrame(animate);
+        }
+
+        initCanvas();
+        animate();
+    </script>
+</body>
+</html>
