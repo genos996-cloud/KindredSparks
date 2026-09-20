@@ -45,7 +45,6 @@
 
   <!-- 3. 主系統容器 -->
   <div id="app-container" class="hidden flex-col flex-1 space-y-4">
-    <!-- 頂部導覽列 -->
     <header class="w-full bg-white/80 apple-blur border border-slate-200/80 rounded-2xl px-5 py-3.5 shadow-sm">
       <div class="w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div>
@@ -57,7 +56,6 @@
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
-          <!-- 登入者身分顯示 -->
           <div class="flex items-center gap-2 bg-slate-100/70 border border-slate-200/60 px-3 py-1.5 rounded-xl text-xs">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             <span id="current-user-name" class="font-semibold text-slate-800">載入中...</span>
@@ -69,13 +67,11 @@
             <span>登記重寄</span>
           </button>
 
-          <!-- 刪除按鈕 (僅 Admin 可用) -->
           <button id="btn-batch-delete" onclick="batchDeleteSelected()" disabled class="hidden px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-slate-200 bg-slate-100 text-slate-400 active:scale-95 transition-transform">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             <span id="label-batch-delete">刪除已選</span>
           </button>
 
-          <!-- 審核管理按鈕 (僅 Admin 可見) -->
           <button id="btn-admin-panel" onclick="toggleAdminPanel()" class="hidden px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 transition-transform">
             <i data-lucide="users" class="w-3.5 h-3.5"></i>
             <span>審核管理</span>
@@ -88,7 +84,6 @@
       </div>
     </header>
 
-    <!-- 隱藏：身分審核管理面板 (Admin Only) -->
     <div id="admin-panel" class="hidden bg-white/90 apple-blur border border-slate-200/80 rounded-2xl p-5 shadow-sm">
       <h2 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i> 使用者身分審核與權限管理</h2>
       <div class="overflow-x-auto">
@@ -106,7 +101,6 @@
       </div>
     </div>
 
-    <!-- 異常備查抽屜 -->
     <section class="w-full bg-white/90 apple-blur border border-slate-200/80 rounded-2xl shadow-sm flex flex-col transition-all duration-300">
       <div onclick="toggleDrawer('reship-drawer')" class="px-5 py-3 bg-slate-50/70 hover:bg-slate-100/70 cursor-pointer border-b border-transparent flex items-center justify-between select-none" id="reship-drawer-header">
         <div class="flex items-center gap-2.5">
@@ -136,7 +130,6 @@
       </div>
     </section>
 
-    <!-- 常態教材進銷存 -->
     <main class="w-full bg-white/90 apple-blur border border-slate-200/80 rounded-2xl shadow-sm flex flex-col flex-1">
       <div class="px-5 py-3 bg-slate-50/50 border-b border-slate-200/60 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -173,17 +166,16 @@
   </div>
 
   <script>
-    // ✅ 確保 Supabase 初始化只宣告一次
-    const supabaseUrl = 'https://dlzcbybmsckhiocbcmvm.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemNieWJtc2NraGlvY2JjbXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTU0MjQsImV4cCI6MjA5NjQ5MTQyNH0.pn2gwkLrUWgc19Gh6W9VOe52SAP4mjKMAfvVZGmoUiU';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    // 徹底改名為 supabaseClient 避免任何全域變數衝突
+    const SUPABASE_URL = 'https://dlzcbybmsckhiocbcmvm.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemNieWJtc2NraGlvY2JjbXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTU0MjQsImV4cCI6MjA5NjQ5MTQyNH0.pn2gwkLrUWgc19Gh6W9VOe52SAP4mjKMAfvVZGmoUiU';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
     let appData = { inventory: [], reshipLogs: [] };
     let selectedInventoryIds = new Set();
     let selectedReshipIds = new Set();
 
-    // 畫面切換
     function showScreen(screenId) {
       ['auth-screen', 'pending-screen', 'app-container'].forEach(id => {
         document.getElementById(id).classList.add('hidden');
@@ -193,18 +185,16 @@
       document.getElementById(screenId).classList.add('flex');
     }
 
-    // Google 登入與登出
     async function loginWithGoogle() {
-      await supabase.auth.signInWithOAuth({ provider: 'google' });
+      await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
     }
 
     async function logout() {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       window.location.reload();
     }
 
-    // 監聽登入狀態
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
         if (session) {
           checkAndSyncUser(session.user);
@@ -216,20 +206,18 @@
       }
     });
 
-    // 驗證身分並同步到 Database Users 表
     async function checkAndSyncUser(authUser) {
-      const { data: userRec, error } = await supabase.from('users').select('*').eq('id', authUser.id).single();
+      const { data: userRec, error } = await supabaseClient.from('users').select('*').eq('id', authUser.id).single();
       
       let finalUser = userRec;
-      
       if (!userRec) {
         const newUser = {
           id: authUser.id,
           email: authUser.email,
           name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
-          role: 'pending' // 新登入者預設為待審核
+          role: 'pending'
         };
-        const { data: inserted } = await supabase.from('users').insert([newUser]).select().single();
+        const { data: inserted } = await supabaseClient.from('users').insert([newUser]).select().single();
         finalUser = inserted;
       }
 
@@ -246,11 +234,9 @@
       }
     }
 
-    // 根據身分設定 UI 權限
     function applyRolePermissions() {
       const btnDelete = document.getElementById('btn-batch-delete');
       const btnAdminPanel = document.getElementById('btn-admin-panel');
-      
       if (currentUser.role === 'admin') {
         btnDelete.classList.remove('hidden');
         btnAdminPanel.classList.remove('hidden');
@@ -260,7 +246,6 @@
       }
     }
 
-    // === Admin 審核面板功能 ===
     function toggleAdminPanel() {
       const panel = document.getElementById('admin-panel');
       if (panel.classList.contains('hidden')) {
@@ -272,7 +257,7 @@
     }
 
     async function loadAdminUsers() {
-      const { data: users } = await supabase.from('users').select('*').order('created_at', { ascending: false });
+      const { data: users } = await supabaseClient.from('users').select('*').order('created_at', { ascending: false });
       const tbody = document.getElementById('admin-users-tbody');
       tbody.innerHTML = users.map(u => `
         <tr class="hover:bg-slate-50 transition-colors">
@@ -291,7 +276,7 @@
     }
 
     async function changeUserRole(userId, newRole) {
-      await supabase.from('users').update({ role: newRole }).eq('id', userId);
+      await supabaseClient.from('users').update({ role: newRole }).eq('id', userId);
       loadAdminUsers(); 
       if (userId === currentUser.id) {
         alert("您已變更自己的權限，頁面將重新整理。");
@@ -299,14 +284,13 @@
       }
     }
 
-    // === 業務邏輯與資料庫操作 ===
     function getTaipeiDate() {
       return new Date().toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
     }
 
     async function loadData() {
-      const { data: invData } = await supabase.from('inventory_items').select('*').order('created_at', { ascending: true });
-      const { data: reshipData } = await supabase.from('reship_logs').select('*').order('created_at', { ascending: false });
+      const { data: invData } = await supabaseClient.from('inventory_items').select('*').order('created_at', { ascending: true });
+      const { data: reshipData } = await supabaseClient.from('reship_logs').select('*').order('created_at', { ascending: false });
       appData.inventory = invData || [];
       appData.reshipLogs = reshipData || [];
       render();
@@ -329,85 +313,49 @@
 
     async function triggerAddReship() {
       toggleDrawer('reship-drawer', true);
-      const newLog = { 
-        report_date: getTaipeiDate(), 
-        reason: '', 
-        content: '', 
-        books_count: 1, 
-        operator_id: currentUser.name 
-      };
-      await supabase.from('reship_logs').insert([newLog]);
+      const newLog = { report_date: getTaipeiDate(), reason: '', content: '', books_count: 1, operator_id: currentUser.name };
+      await supabaseClient.from('reship_logs').insert([newLog]);
       await loadData();
     }
 
     async function addNewItemRow() {
       const today = getTaipeiDate();
-      const newItem = { 
-        title: '', 
-        base_stock: 0, 
-        state: 'NONE', 
-        qty: 0, 
-        prev_date: today, 
-        last_date: today, 
-        operator_id: currentUser.name 
-      };
-      await supabase.from('inventory_items').insert([newItem]);
+      const newItem = { title: '', base_stock: 0, state: 'NONE', qty: 0, prev_date: today, last_date: today, operator_id: currentUser.name };
+      await supabaseClient.from('inventory_items').insert([newItem]);
       await loadData();
     }
 
     async function updateInventory(id, field, value) {
       const item = appData.inventory.find(r => r.id === id);
       if (!item) return;
-      
       let updateData = { operator_id: currentUser.name };
       const today = getTaipeiDate();
-      
-      if (item.last_date !== today) { 
-        updateData.prev_date = item.last_date || today; 
-        updateData.last_date = today; 
-      }
-      
-      if (field === 'state') { 
-        updateData.state = value; 
-        if (value === 'NONE') updateData.qty = 0; 
-      } else if (field === 'qty' || field === 'base_stock') {
-        updateData[field] = Math.max(0, parseInt(value) || 0);
-      } else {
-        updateData[field] = value;
-      }
-      
-      await supabase.from('inventory_items').update(updateData).eq('id', id);
+      if (item.last_date !== today) { updateData.prev_date = item.last_date || today; updateData.last_date = today; }
+      if (field === 'state') { updateData.state = value; if (value === 'NONE') updateData.qty = 0; }
+      else if (field === 'qty' || field === 'base_stock') updateData[field] = Math.max(0, parseInt(value) || 0);
+      else updateData[field] = value;
+      await supabaseClient.from('inventory_items').update(updateData).eq('id', id);
       await loadData();
     }
 
     async function updateReship(id, field, value) {
       let updateData = { operator_id: currentUser.name };
       updateData[field] = field === 'books_count' ? Math.max(1, parseInt(value) || 1) : value;
-      await supabase.from('reship_logs').update(updateData).eq('id', id);
+      await supabaseClient.from('reship_logs').update(updateData).eq('id', id);
       await loadData();
     }
 
-    // 刪除邏輯 (僅 Admin)
     async function batchDeleteSelected() {
       if (currentUser.role !== 'admin') return; 
-      
       const total = selectedInventoryIds.size + selectedReshipIds.size;
       if (total === 0) return;
-      
       if (confirm(`確定要刪除所有已勾選的 ${total} 筆項目嗎？`)) {
-        if (selectedInventoryIds.size > 0) { 
-          await supabase.from('inventory_items').delete().in('id', Array.from(selectedInventoryIds)); 
-          selectedInventoryIds.clear(); 
-        }
-        if (selectedReshipIds.size > 0) { 
-          await supabase.from('reship_logs').delete().in('id', Array.from(selectedReshipIds)); 
-          selectedReshipIds.clear(); 
-        }
+        if (selectedInventoryIds.size > 0) { await supabaseClient.from('inventory_items').delete().in('id', Array.from(selectedInventoryIds)); selectedInventoryIds.clear(); }
+        if (selectedReshipIds.size > 0) { await supabaseClient.from('reship_logs').delete().in('id', Array.from(selectedReshipIds)); selectedReshipIds.clear(); }
         await loadData();
       }
     }
 
-    // UI Checkbox 處理
     function toggleSelectInventory(id, checked) { checked ? selectedInventoryIds.add(id) : selectedInventoryIds.delete(id); updateBatchUI(); }
     function toggleSelectAllInventory(checked) { checked ? appData.inventory.forEach(i => selectedInventoryIds.add(i.id)) : selectedInventoryIds.clear(); updateBatchUI(); renderInventoryTable(); }
     function toggleSelectReship(id, checked) { checked ? selectedReshipIds.add(id) : selectedReshipIds.delete(id); updateBatchUI(); }
@@ -417,7 +365,6 @@
       const btn = document.getElementById('btn-batch-delete');
       const label = document.getElementById('label-batch-delete');
       if (currentUser?.role !== 'admin') return;
-      
       const total = selectedInventoryIds.size + selectedReshipIds.size;
       if (total > 0) {
         btn.disabled = false;
@@ -435,7 +382,6 @@
       return item.state === 'IN' ? base + q : item.state === 'OUT' ? Math.max(0, base - q) : base;
     }
 
-    // 渲染表格
     function renderInventoryTable() {
       const tbody = document.getElementById('inventory-tbody');
       tbody.innerHTML = appData.inventory.map((item, index) => {
