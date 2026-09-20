@@ -794,7 +794,16 @@
           <td class="p-2 border-r border-slate-100"><input type="text" value="${row.reason}" placeholder="事由" ${isLocked ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'reason', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs text-slate-500"></td>
           <td class="p-2 border-r border-slate-100"><input type="number" step="0.5" value="${row.approvedHours}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approvedHours', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs font-bold text-slate-700"></td>
           <td class="p-2 border-r border-slate-100"><input type="number" step="10" value="${row.baseRate}" ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'baseRate', this.value)" class="table-input w-full text-center bg-transparent border border-transparent rounded px-1 text-xs"></td>
-          <td class="p-2 border-r border-slate-100"><select ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'multiplier', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs"><option value="1.0" ${row.multiplier==1.0?'selected':''}>1.0x</option><option value="1.34" ${row.multiplier==1.34?'selected':''}>1.34x</option><option value="1.67" ${row.multiplier==1.67?'selected':''}>1.67x</option></select></td>
+          
+          <td class="p-2 border-r border-slate-100">
+            <select ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'multiplier', this.value)" class="table-input w-full bg-transparent border border-transparent rounded px-1 text-xs">
+              <option value="1.34" ${row.multiplier==1.34?'selected':''}>1.34x</option>
+              <option value="1.67" ${row.multiplier==1.67?'selected':''}>1.67x</option>
+              <option value="2.0" ${row.multiplier==2.0?'selected':''}>2.0x</option>
+              <option value="2.67" ${row.multiplier==2.67?'selected':''}>2.67x</option>
+            </select>
+          </td>
+
           <td class="p-2 text-center border-r border-slate-100"><input type="checkbox" ${row.approved ? 'checked' : ''} ${(!isAdmin || isLocked) ? 'disabled' : ''} onchange="updateOvertime(${row.id}, 'approved', this.checked)" class="accent-indigo-600 w-3.5 h-3.5 cursor-pointer"></td>
           <td class="p-2 text-right pr-3 font-medium border-r border-slate-100 ${row.approved ? 'text-slate-800' : 'text-slate-300 line-through'}">$ ${linePay.toLocaleString()}</td>
           <td class="p-2 text-center row-action-cell">${!isLocked ? `<button onclick="deleteOvertimeRow(${row.id})" class="text-slate-300 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>` : ''}</td>
