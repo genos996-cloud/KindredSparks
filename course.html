@@ -70,7 +70,7 @@
         let currentUserApp = ""; 
         let currentUserRole = "pending";
         let currentUserId = ""; 
-        let isPersonalView = false; // 兼職與外聘隔離視角
+        let isPersonalView = false;
 
         // ================= 2. 八周變形工時與節假日引擎 =================
         const holidays2026 = [
@@ -201,7 +201,7 @@
                     </div>
                 </div>
 
-                <!-- 視圖切換器：月曆總覽 / 當日班表 -->
+                <!-- 視圖切換器 -->
                 <div class="flex bg-slate-100/90 p-1.5 rounded-2xl shadow-inner border border-slate-200/60 backdrop-blur-md">
                     <button id="viewToggleMonth" onclick="switchView('month')" class="px-5 py-2 rounded-xl text-xs font-black tab-active transition-all flex items-center gap-1.5 shadow-sm">
                         <span>📅</span> 月曆總覽
@@ -211,7 +211,7 @@
                     </button>
                 </div>
                 
-                <!-- 單日切換面板（在日班表模式才顯示） -->
+                <!-- 單日切換面板 -->
                 <div id="dayNavControls" class="hidden items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl shadow-inner border border-slate-200/60 w-full md:w-auto justify-between backdrop-blur-md">
                     <button onclick="changeDate(-1)" class="bg-white hover:bg-slate-50 px-4 py-2 rounded-xl flex items-center justify-center font-bold text-xs text-slate-600 gap-1 shadow-sm border border-slate-200/50 transition-all active:scale-95">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
@@ -260,7 +260,7 @@
                 </div>
             </div>
             
-            <!-- 視圖 A：月曆總覽視圖 (預設呈現) -->
+            <!-- 視圖 A：月曆總覽視圖 (預設進入) -->
             <div id="monthViewContainer" class="p-4 md:p-6 fade-enter">
                 <div class="flex flex-col sm:flex-row items-center justify-between pb-5 mb-5 border-b border-slate-100 gap-3">
                     <div class="flex items-center gap-3">
@@ -289,7 +289,7 @@
                 <div id="monthCalendarGrid" class="grid grid-cols-7 gap-2.5"></div>
             </div>
 
-            <!-- 視圖 B：日班表網格 (點擊日期進入) -->
+            <!-- 視圖 B：日班表網格 -->
             <div id="dayViewContainer" class="hidden fade-enter">
                 <div class="bg-indigo-50/70 px-5 py-3 border-b border-indigo-100 flex justify-between items-center backdrop-blur-sm">
                     <div class="flex items-center gap-2">
@@ -431,8 +431,8 @@
         // ================= 前端共用與日期狀態 =================
         let teachers = []; 
         let db = {}; 
-        let currentCalendarMonth = getTaiwanDateObj(); // 當前月曆瀏覽月份
-        let currentActiveView = 'month'; // 'month' (預設) 或 'day'
+        let currentCalendarMonth = getTaiwanDateObj();
+        let currentActiveView = 'month';
 
         let state = { 
             date: getTaiwanDateObj().toISOString().split('T')[0], 
@@ -469,7 +469,7 @@
             renderGrid(); 
         });
 
-        // ================= 月曆切換與渲染核心 =================
+        // ================= 雙視圖切換與單字徽章月曆渲染 =================
         function switchView(viewMode) {
             currentActiveView = viewMode;
             const monthCont = document.getElementById('monthViewContainer');
@@ -521,7 +521,7 @@
             const m = currentCalendarMonth.getMonth();
             document.getElementById('monthTitleText').innerText = `${y} 年 ${m + 1} 月`;
 
-            const firstDayOfWeek = new Date(y, m, 1).getDay(); // 0 = 週日
+            const firstDayOfWeek = new Date(y, m, 1).getDay();
             const totalDaysInMonth = new Date(y, m + 1, 0).getDate();
             const grid = document.getElementById('monthCalendarGrid');
             grid.innerHTML = '';
@@ -530,24 +530,37 @@
 
             // 1. 填補前置空格
             for (let i = 0; i < firstDayOfWeek; i++) {
-                grid.innerHTML += `<div class="min-h-[92px] bg-slate-50/40 rounded-2xl border border-dashed border-slate-200/50"></div>`;
+                grid.innerHTML += `<div class="min-h-[105px] bg-slate-50/40 rounded-2xl border border-dashed border-slate-200/50"></div>`;
             }
 
-            // 2. 渲染當月每日格子 (極簡視覺摘要，不堆砌繁雜課名)
+            // 2. 渲染每日格子 (單字頭像徽章架構)
             for (let d = 1; d <= totalDaysInMonth; d++) {
                 const dayStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 
-                // 統計當日課堂數與休假數
-                let classCount = 0;
-                let leaveCount = 0;
+                let classTeachers = new Map();
+                let leaveTeachers = new Map();
+                let totalClassCount = 0;
 
                 teachers.forEach(t => {
+                    const rawName = (t.name || '未').trim();
+                    const singleChar = rawName.charAt(0);
+
                     timeBlocks.forEach(b => {
                         const recs = db[`${dayStr}_${t.id}_${b}`] || [];
                         recs.forEach(r => {
                             if (r.status === 'active') {
-                                if (r.type === 'class') classCount++;
-                                else if (r.type === 'leave') leaveCount++;
+                                if (r.type === 'class') {
+                                    totalClassCount++;
+                                    if (!classTeachers.has(t.id)) {
+                                        classTeachers.set(t.id, { name: rawName, char: singleChar, count: 1 });
+                                    } else {
+                                        classTeachers.get(t.id).count++;
+                                    }
+                                } else if (r.type === 'leave') {
+                                    if (!leaveTeachers.has(t.id)) {
+                                        leaveTeachers.set(t.id, { name: rawName, char: singleChar, typeDesc: r.desc });
+                                    }
+                                }
                             }
                         });
                     });
@@ -560,24 +573,44 @@
                     ? 'border-indigo-500 ring-2 ring-indigo-200 bg-white shadow-md' 
                     : (isCurrentSelected ? 'border-indigo-300 bg-indigo-50/20' : 'border-slate-200/70 bg-white/70 hover:bg-white');
 
+                // 排課單字徽章 (紫底白字，hover 顯示全名與堂數)
+                let badgesHtml = '';
+                classTeachers.forEach((info) => {
+                    badgesHtml += `
+                        <span title="${info.name} (排課 ${info.count} 堂)" 
+                              class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs flex items-center justify-center shadow-xs border border-indigo-700/20 hover:scale-110 transition-transform cursor-pointer">
+                            ${info.char}
+                        </span>`;
+                });
+
+                // 請假/休假單字徽章 (橘黃底黑字，hover 顯示假別)
+                leaveTeachers.forEach((info) => {
+                    badgesHtml += `
+                        <span title="${info.name} (${info.typeDesc || '休假'})" 
+                              class="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 border border-amber-300 font-black text-xs flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
+                            ${info.char}
+                        </span>`;
+                });
+
                 grid.innerHTML += `
                     <div onclick="selectDateFromMonth('${dayStr}')" 
-                         class="min-h-[92px] p-2.5 rounded-2xl border ${borderStyle} hover:shadow-lg hover:border-indigo-400 transition-all cursor-pointer flex flex-col justify-between group">
+                         class="min-h-[105px] p-2.5 rounded-2xl border ${borderStyle} hover:shadow-lg hover:border-indigo-400 transition-all cursor-pointer flex flex-col justify-between group">
                         
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-black ${isToday ? 'text-indigo-600' : 'text-slate-700'}">${d}</span>
-                            ${isToday ? '<span class="text-[9px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded-md shadow-sm">今日</span>' : ''}
+                            ${isToday ? '<span class="text-[9px] font-black bg-indigo-600 text-white px-1.5 py-0.2 rounded-md shadow-xs">今日</span>' : ''}
                         </div>
 
-                        <!-- 狀態指標 (極簡膠囊) -->
-                        <div class="flex flex-wrap items-center gap-1.5 my-1">
-                            ${classCount > 0 ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-100/80 shadow-xs">${classCount} 課</span>` : ''}
-                            ${leaveCount > 0 ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-100/80 shadow-xs">${leaveCount} 休</span>` : ''}
-                            ${(classCount === 0 && leaveCount === 0) ? '<span class="text-[10px] font-bold text-slate-300">無行程</span>' : ''}
+                        <!-- 單字頭像徽章展示區 -->
+                        <div class="flex flex-wrap gap-1 my-1.5 content-start min-h-[32px]">
+                            ${badgesHtml !== '' ? badgesHtml : '<span class="text-[11px] font-bold text-slate-300">無安排</span>'}
                         </div>
 
-                        <div class="text-[10px] text-right text-slate-300 group-hover:text-indigo-500 font-bold transition-colors">
-                            查看班表 ➜
+                        <div class="flex justify-between items-center text-[10px] pt-1 border-t border-slate-100">
+                            <span class="font-bold ${totalClassCount > 0 ? 'text-indigo-600' : 'text-slate-300'}">
+                                ${totalClassCount > 0 ? `${totalClassCount} 堂課` : ''}
+                            </span>
+                            <span class="text-slate-300 group-hover:text-indigo-500 font-bold transition-colors">班表 ➜</span>
                         </div>
                     </div>
                 `;
@@ -777,7 +810,6 @@
                     }
                     
                     await loadDataFromDB();
-                    // 預設切換為月曆模式
                     switchView('month');
                 }
             } else { 
