@@ -138,10 +138,10 @@
                                 if (isFull && !isCSVHalf) { if(!countedFullDayDates.spec.has(dateStr)) { spec += 1; countedFullDayDates.spec.add(dateStr); } } else spec += daysToAdd;
                             }
                             if (r.desc.includes('病假')) {
-                                if (isFull && !isCSVHalf) { if(!countedFullDayDates.sick.has(dateStr)) { sick += 1; countedFullDayDates.sick.add(dateStr); } } else sick += daysToAdd;
+                                if (isFull && !isCSVHalf) { if(!countedFullDayDates.sick.has(dateStr)) { sick += 1; countedFullDayDates.sick.add(dateStr); } } else spec += daysToAdd;
                             }
                             if (r.desc.includes('事假')) {
-                                if (isFull && !isCSVHalf) { if(!countedFullDayDates.pers.has(dateStr)) { pers += 1; countedFullDayDates.pers.add(dateStr); } } else pers += daysToAdd;
+                                if (isFull && !isCSVHalf) { if(!countedFullDayDates.pers.has(dateStr)) { pers += 1; countedFullDayDates.pers.add(dateStr); } } else spec += daysToAdd;
                             }
                         }
                     }
@@ -280,9 +280,9 @@
                     </div>
                 </div>
 
-                <!-- 星期表頭 -->
+                <!-- 星期表頭 (已切換為：週一至週日) -->
                 <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-black text-slate-400 tracking-widest uppercase">
-                    <div class="text-rose-400">週日</div><div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div class="text-indigo-400">週六</div>
+                    <div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div class="text-indigo-400">週六</div><div class="text-rose-400">週日</div>
                 </div>
 
                 <!-- 42 格月曆網格 -->
@@ -521,15 +521,18 @@
             const m = currentCalendarMonth.getMonth();
             document.getElementById('monthTitleText').innerText = `${y} 年 ${m + 1} 月`;
 
-            const firstDayOfWeek = new Date(y, m, 1).getDay();
+            // 計算 1 號星期幾，轉換為：週一為第 0 格、週日為第 6 格
+            const rawFirstDay = new Date(y, m, 1).getDay(); // 0(日), 1(一), ..., 6(六)
+            const firstDayOffset = (rawFirstDay === 0) ? 6 : rawFirstDay - 1; // 週一=0, 週二=1, ..., 週日=6
+
             const totalDaysInMonth = new Date(y, m + 1, 0).getDate();
             const grid = document.getElementById('monthCalendarGrid');
             grid.innerHTML = '';
 
             const todayStr = getTaiwanDateObj().toISOString().split('T')[0];
 
-            // 1. 填補前置空格
-            for (let i = 0; i < firstDayOfWeek; i++) {
+            // 1. 填補前置空格 (對齊週一)
+            for (let i = 0; i < firstDayOffset; i++) {
                 grid.innerHTML += `<div class="min-h-[105px] bg-slate-50/40 rounded-2xl border border-dashed border-slate-200/50"></div>`;
             }
 
