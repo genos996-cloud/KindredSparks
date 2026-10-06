@@ -53,8 +53,8 @@
         .timeline-item::before { content: ''; position: absolute; left: -25px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background-color: #8b5cf6; border: 2px solid white; box-shadow: 0 0 0 2px #ddd6fe; }
         .timeline-item::after { content: ''; position: absolute; left: -20px; top: 18px; bottom: -20px; width: 2px; background-color: #e2e8f0; }
         
-        .fade-enter { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); filter: blur(4px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+        .fade-enter { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         table { border-collapse: separate; border-spacing: 0; }
         th { font-weight: 700; letter-spacing: 0.025em; }
     </style>
@@ -70,7 +70,7 @@
         let currentUserApp = ""; 
         let currentUserRole = "pending";
         let currentUserId = ""; 
-        let isPersonalView = false; // 兼職 (part_time) 與外聘專屬隔離視角
+        let isPersonalView = false; // 兼職與外聘隔離視角
 
         // ================= 2. 八周變形工時與節假日引擎 =================
         const holidays2026 = [
@@ -167,6 +167,7 @@
         }
     </script>
 
+    <!-- 登入與審核畫面 -->
     <div id="authScreen" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/10 backdrop-blur-xl overflow-y-auto py-10">
         <div class="panel-3d p-12 w-full max-w-md flex flex-col items-center fade-enter">
             <div class="w-24 h-24 bg-gradient-to-br from-indigo-50 to-purple-100 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner border border-white">
@@ -188,7 +189,8 @@
         </div>
     </div>
 
-    <div id="appScreen" class="hidden w-full p-2 md:p-6 mx-auto space-y-6">
+    <!-- 主應用介面 -->
+    <div id="appScreen" class="hidden w-full p-2 md:p-6 mx-auto space-y-5">
         <header class="panel-3d p-4 md:p-5 flex flex-col xl:flex-row justify-between items-center gap-4 border border-white">
             <div class="flex flex-col md:flex-row items-center gap-5 w-full xl:w-auto">
                 <div class="flex items-center gap-3 mr-2 px-2">
@@ -198,26 +200,38 @@
                         <div class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Course Scheduling</div>
                     </div>
                 </div>
+
+                <!-- 視圖切換器：月曆總覽 / 當日班表 -->
+                <div class="flex bg-slate-100/90 p-1.5 rounded-2xl shadow-inner border border-slate-200/60 backdrop-blur-md">
+                    <button id="viewToggleMonth" onclick="switchView('month')" class="px-5 py-2 rounded-xl text-xs font-black tab-active transition-all flex items-center gap-1.5 shadow-sm">
+                        <span>📅</span> 月曆總覽
+                    </button>
+                    <button id="viewToggleDay" onclick="switchView('day')" class="px-5 py-2 rounded-xl text-xs font-black tab-inactive transition-all flex items-center gap-1.5">
+                        <span>📋</span> 當日班表
+                    </button>
+                </div>
                 
-                <div class="flex items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl shadow-inner border border-slate-200/60 w-full md:w-auto justify-between backdrop-blur-md">
-                    <button onclick="changeDate(-1)" class="bg-white hover:bg-slate-50 px-5 py-2 rounded-xl flex items-center justify-center font-bold text-sm text-slate-600 gap-1 shadow-sm border border-slate-200/50 transition-all active:scale-95">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
-                        <span class="hidden md:inline">上一日</span>
+                <!-- 單日切換面板（在日班表模式才顯示） -->
+                <div id="dayNavControls" class="hidden items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl shadow-inner border border-slate-200/60 w-full md:w-auto justify-between backdrop-blur-md">
+                    <button onclick="changeDate(-1)" class="bg-white hover:bg-slate-50 px-4 py-2 rounded-xl flex items-center justify-center font-bold text-xs text-slate-600 gap-1 shadow-sm border border-slate-200/50 transition-all active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
+                        <span>前一日</span>
                     </button>
                     
-                    <label class="relative flex items-center justify-center cursor-pointer hover:bg-white/50 rounded-xl transition-colors px-4 py-2 mx-1 group shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] border border-transparent hover:border-slate-200/50">
-                        <span id="dateDisplay" class="text-indigo-700 text-[17px] font-black tracking-widest mr-2 pointer-events-none"></span>
-                        <svg class="w-5 h-5 text-indigo-300 group-hover:text-indigo-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <label class="relative flex items-center justify-center cursor-pointer hover:bg-white/50 rounded-xl transition-colors px-3 py-1.5 mx-1 group border border-transparent hover:border-slate-200/50">
+                        <span id="dateDisplay" class="text-indigo-700 text-sm font-black tracking-wider mr-1.5 pointer-events-none"></span>
+                        <svg class="w-4 h-4 text-indigo-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         <input type="date" id="currentDate" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                     </label>
 
-                    <button onclick="changeDate(1)" class="bg-white hover:bg-slate-50 px-5 py-2 rounded-xl flex items-center justify-center font-bold text-sm text-slate-600 gap-1 shadow-sm border border-slate-200/50 transition-all active:scale-95">
-                        <span class="hidden md:inline">下一日</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                    <button onclick="changeDate(1)" class="bg-white hover:bg-slate-50 px-4 py-2 rounded-xl flex items-center justify-center font-bold text-xs text-slate-600 gap-1 shadow-sm border border-slate-200/50 transition-all active:scale-95">
+                        <span>後一日</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
                     </button>
                 </div>
             </div>
 
+            <!-- 右側功能與管理面板 -->
             <div class="flex flex-wrap items-center justify-center gap-3 w-full xl:w-auto mt-2 xl:mt-0">
                 <div class="text-sm text-slate-700 bg-white/60 px-4 py-2.5 rounded-xl border border-slate-200/60 shadow-sm flex items-center gap-2 font-bold backdrop-blur-sm">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
@@ -225,21 +239,20 @@
                     <span id="userRoleBadge" class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold">載入中...</span>
                 </div>
                 
-                <div id="adminActionButtons" class="flex flex-wrap items-center gap-3 hidden">
-                    <button onclick="openUserApprovalModal()" class="px-5 py-2.5 text-sm font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm rounded-xl flex items-center gap-2 hover:bg-amber-100 transition-colors active:scale-95">👥 權限審核</button>
+                <div id="adminActionButtons" class="flex flex-wrap items-center gap-2 hidden">
+                    <button onclick="openUserApprovalModal()" class="px-4 py-2 text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm rounded-xl flex items-center gap-1.5 hover:bg-amber-100 transition-colors active:scale-95">👥 權限審核</button>
                     <input type="file" id="csvFileInput" accept=".csv" onchange="handleCSVUpload(event)" multiple class="hidden">
-                    <button onclick="triggerCSVUpload()" class="px-5 py-2.5 text-sm font-bold bg-slate-800 text-white rounded-xl shadow-md flex items-center gap-2 hover:bg-slate-700 transition-colors active:scale-95">📥 匯入班表</button>
-                    
-                    <button onclick="exportCSV()" class="px-5 py-2.5 text-sm font-bold btn-3d-secondary rounded-xl flex items-center gap-2">匯出報表</button>
-                    <button onclick="openSalaryTrackerModal()" class="px-5 py-2.5 text-sm font-bold btn-3d-success rounded-xl flex items-center gap-2">💵 兼職核算</button>
-                    <button onclick="openFlexTrackerModal()" class="px-5 py-2.5 text-sm font-bold btn-3d-primary rounded-xl flex items-center gap-2">合規結算</button>
+                    <button onclick="triggerCSVUpload()" class="px-4 py-2 text-xs font-bold bg-slate-800 text-white rounded-xl shadow-md flex items-center gap-1.5 hover:bg-slate-700 transition-colors active:scale-95">📥 匯入班表</button>
+                    <button onclick="exportCSV()" class="px-4 py-2 text-xs font-bold btn-3d-secondary rounded-xl flex items-center gap-1.5">匯出報表</button>
+                    <button onclick="openSalaryTrackerModal()" class="px-4 py-2 text-xs font-bold btn-3d-success rounded-xl flex items-center gap-1.5">💵 兼職核算</button>
+                    <button onclick="openFlexTrackerModal()" class="px-4 py-2 text-xs font-bold btn-3d-primary rounded-xl flex items-center gap-1.5">合規結算</button>
                 </div>
 
-                <button onclick="handleSystemLogout()" class="px-4 py-2.5 text-sm font-bold btn-3d-danger rounded-xl flex items-center gap-1">登出</button>
+                <button onclick="handleSystemLogout()" class="px-4 py-2 text-xs font-bold btn-3d-danger rounded-xl flex items-center gap-1">登出</button>
             </div>
         </header>
 
-        <main class="panel-3d border border-white/60 relative w-full overflow-hidden shadow-xl shadow-indigo-900/5">
+        <main class="panel-3d border border-white/60 relative w-full overflow-hidden shadow-xl shadow-indigo-900/5 min-h-[600px]">
             <div id="loadingOverlay" class="absolute inset-0 bg-white/60 backdrop-blur-md z-30 flex items-center justify-center hidden rounded-1.5rem">
                 <div class="font-black text-indigo-600 flex items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-lg border border-indigo-100">
                     <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -247,16 +260,58 @@
                 </div>
             </div>
             
-            <div class="overflow-x-auto w-full no-scrollbar">
-                <table class="w-full text-left border-collapse table-fixed min-w-[1000px]">
-                    <thead><tr class="bg-slate-50/80 backdrop-blur-sm border-b border-slate-200/60 shadow-sm" id="headerRow"></tr></thead>
-                    <tbody id="gridBody" class="bg-white/40"></tbody>
-                </table>
+            <!-- 視圖 A：月曆總覽視圖 (預設呈現) -->
+            <div id="monthViewContainer" class="p-4 md:p-6 fade-enter">
+                <div class="flex flex-col sm:flex-row items-center justify-between pb-5 mb-5 border-b border-slate-100 gap-3">
+                    <div class="flex items-center gap-3">
+                        <button onclick="changeMonth(-1)" class="btn-3d-secondary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg> 上個月
+                        </button>
+                        <h3 id="monthTitleText" class="text-2xl font-black text-slate-800 tracking-wider"></h3>
+                        <button onclick="changeMonth(1)" class="btn-3d-secondary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1">
+                            下個月 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="goToCurrentMonth()" class="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-xl transition-all shadow-sm">
+                            回到本月
+                        </button>
+                        <span class="text-xs font-semibold text-slate-400">💡 點選任一日期，即可深入查看當天全員課表</span>
+                    </div>
+                </div>
+
+                <!-- 星期表頭 -->
+                <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-black text-slate-400 tracking-widest uppercase">
+                    <div class="text-rose-400">週日</div><div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div class="text-indigo-400">週六</div>
+                </div>
+
+                <!-- 42 格月曆網格 -->
+                <div id="monthCalendarGrid" class="grid grid-cols-7 gap-2.5"></div>
+            </div>
+
+            <!-- 視圖 B：日班表網格 (點擊日期進入) -->
+            <div id="dayViewContainer" class="hidden fade-enter">
+                <div class="bg-indigo-50/70 px-5 py-3 border-b border-indigo-100 flex justify-between items-center backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                        <button onclick="switchView('month')" class="px-3.5 py-1.5 bg-white hover:bg-slate-50 border border-indigo-200 text-indigo-700 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1">
+                            ⬅️ 返回月曆總覽
+                        </button>
+                        <span class="text-xs font-bold text-slate-500">正在檢視單日全體排班</span>
+                    </div>
+                    <span id="dayViewCurrentTag" class="text-xs font-black text-indigo-900 bg-white px-3 py-1 rounded-lg border border-indigo-200 shadow-sm"></span>
+                </div>
+                
+                <div class="overflow-x-auto w-full no-scrollbar">
+                    <table class="w-full text-left border-collapse table-fixed min-w-[1000px]">
+                        <thead><tr class="bg-slate-50/80 backdrop-blur-sm border-b border-slate-200/60 shadow-sm" id="headerRow"></tr></thead>
+                        <tbody id="gridBody" class="bg-white/40"></tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- 管理員審核面板（完整下拉式選單版，獨立樣式控制防止衝突） -->
+    <!-- 管理員審核面板 -->
     <div id="modalUserApproval" style="display: none;" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[999] flex items-center justify-center p-4">
         <div class="panel-3d p-8 w-full max-w-2xl flex flex-col max-h-[85vh] shadow-2xl bg-white relative z-10">
             <div class="flex justify-between items-center mb-6">
@@ -278,6 +333,7 @@
         </div>
     </div>
 
+    <!-- 行程寫入與編輯面板 -->
     <div id="modalInput" class="fixed inset-0 bg-slate-900/30 backdrop-blur-md hidden flex items-center justify-center z-[60]">
         <div class="panel-3d p-8 w-full max-w-md transform transition-all shadow-2xl">
             <div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-black text-slate-800" id="inputModalTitle">新增行程</h3><button id="btnViewCellHistory" class="hidden text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm">查看歷史</button></div>
@@ -303,6 +359,7 @@
         </div>
     </div>
 
+    <!-- 歷程紀錄面板 -->
     <div id="modalHistory" class="fixed inset-0 bg-slate-900/30 backdrop-blur-md hidden flex items-center justify-center z-[70]">
         <div class="panel-3d p-8 w-full max-w-md flex flex-col max-h-[85vh] shadow-2xl">
             <div class="flex justify-between items-start mb-6"><div><h3 class="text-2xl font-black text-slate-800" id="histTitle">資料歷程紀錄</h3><p class="text-sm text-slate-500 mt-1 font-semibold" id="histSubtitle"></p></div><button onclick="document.getElementById('modalHistory').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold bg-slate-100 w-8 h-8 rounded-full transition-colors">&times;</button></div>
@@ -360,6 +417,7 @@
         </div>
     </div>
 
+    <!-- 兼職薪資面板 -->
     <div id="modalSalary" class="fixed inset-0 bg-slate-900/30 backdrop-blur-md hidden flex items-center justify-center z-50">
         <div class="panel-3d p-8 w-full max-w-4xl flex flex-col max-h-[85vh] shadow-2xl">
             <div class="flex justify-between items-center mb-6"><div><h3 class="text-2xl font-black text-slate-800">兼職薪資核算面板</h3></div><button onclick="document.getElementById('modalSalary').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 bg-slate-100 w-8 h-8 rounded-full text-2xl font-bold transition-colors">&times;</button></div>
@@ -370,7 +428,19 @@
     </div>
 
     <script>
-        // ================= 前端共用與日期美化邏輯 =================
+        // ================= 前端共用與日期狀態 =================
+        let teachers = []; 
+        let db = {}; 
+        let currentCalendarMonth = getTaiwanDateObj(); // 當前月曆瀏覽月份
+        let currentActiveView = 'month'; // 'month' (預設) 或 'day'
+
+        let state = { 
+            date: getTaiwanDateObj().toISOString().split('T')[0], 
+            selectedTarget: { tId: null, block: null, currentType: null }, 
+            inputMode: 'class', 
+            editTarget: { key: null, eventId: null } 
+        };
+
         function updateDateDisplay() {
             const d = new Date(state.date);
             const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
@@ -378,13 +448,143 @@
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
             const dayOfWeek = days[d.getDay()];
-            document.getElementById('dateDisplay').innerText = `${year}年${month}月${day}日 (${dayOfWeek})`;
+            const displayStr = `${year}年${month}月${day}日 (${dayOfWeek})`;
+            document.getElementById('dateDisplay').innerText = displayStr;
+            const tag = document.getElementById('dayViewCurrentTag');
+            if(tag) tag.innerText = displayStr;
         }
 
-        function changeDate(offset) { let d = new Date(state.date); d.setDate(d.getDate() + offset); state.date = d.toISOString().split('T')[0]; document.getElementById('currentDate').value = state.date; updateDateDisplay(); renderGrid(); }
-        function goToToday() { state.date = getTaiwanDateObj().toISOString().split('T')[0]; document.getElementById('currentDate').value = state.date; updateDateDisplay(); renderGrid(); }
-        document.getElementById('currentDate').addEventListener('change', (e) => { state.date = e.target.value; updateDateDisplay(); renderGrid(); });
+        function changeDate(offset) { 
+            let d = new Date(state.date); 
+            d.setDate(d.getDate() + offset); 
+            state.date = d.toISOString().split('T')[0]; 
+            document.getElementById('currentDate').value = state.date; 
+            updateDateDisplay(); 
+            renderGrid(); 
+        }
 
+        document.getElementById('currentDate').addEventListener('change', (e) => { 
+            state.date = e.target.value; 
+            updateDateDisplay(); 
+            renderGrid(); 
+        });
+
+        // ================= 月曆切換與渲染核心 =================
+        function switchView(viewMode) {
+            currentActiveView = viewMode;
+            const monthCont = document.getElementById('monthViewContainer');
+            const dayCont = document.getElementById('dayViewContainer');
+            const dayControls = document.getElementById('dayNavControls');
+            const tabMonth = document.getElementById('viewToggleMonth');
+            const tabDay = document.getElementById('viewToggleDay');
+
+            if (viewMode === 'month') {
+                monthCont.classList.remove('hidden');
+                dayCont.classList.add('hidden');
+                dayControls.classList.add('hidden');
+                dayControls.classList.remove('flex');
+                
+                tabMonth.className = 'px-5 py-2 rounded-xl text-xs font-black tab-active transition-all flex items-center gap-1.5 shadow-sm';
+                tabDay.className = 'px-5 py-2 rounded-xl text-xs font-black tab-inactive transition-all flex items-center gap-1.5';
+                renderMonthView();
+            } else {
+                monthCont.classList.add('hidden');
+                dayCont.classList.remove('hidden');
+                dayControls.classList.remove('hidden');
+                dayControls.classList.add('flex');
+                
+                tabDay.className = 'px-5 py-2 rounded-xl text-xs font-black tab-active transition-all flex items-center gap-1.5 shadow-sm';
+                tabMonth.className = 'px-5 py-2 rounded-xl text-xs font-black tab-inactive transition-all flex items-center gap-1.5';
+                updateDateDisplay();
+                renderGrid();
+            }
+        }
+
+        function changeMonth(offset) {
+            currentCalendarMonth.setMonth(currentCalendarMonth.getMonth() + offset);
+            renderMonthView();
+        }
+
+        function goToCurrentMonth() {
+            currentCalendarMonth = getTaiwanDateObj();
+            renderMonthView();
+        }
+
+        function selectDateFromMonth(targetDateStr) {
+            state.date = targetDateStr;
+            document.getElementById('currentDate').value = targetDateStr;
+            switchView('day');
+        }
+
+        function renderMonthView() {
+            const y = currentCalendarMonth.getFullYear();
+            const m = currentCalendarMonth.getMonth();
+            document.getElementById('monthTitleText').innerText = `${y} 年 ${m + 1} 月`;
+
+            const firstDayOfWeek = new Date(y, m, 1).getDay(); // 0 = 週日
+            const totalDaysInMonth = new Date(y, m + 1, 0).getDate();
+            const grid = document.getElementById('monthCalendarGrid');
+            grid.innerHTML = '';
+
+            const todayStr = getTaiwanDateObj().toISOString().split('T')[0];
+
+            // 1. 填補前置空格
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                grid.innerHTML += `<div class="min-h-[92px] bg-slate-50/40 rounded-2xl border border-dashed border-slate-200/50"></div>`;
+            }
+
+            // 2. 渲染當月每日格子 (極簡視覺摘要，不堆砌繁雜課名)
+            for (let d = 1; d <= totalDaysInMonth; d++) {
+                const dayStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                
+                // 統計當日課堂數與休假數
+                let classCount = 0;
+                let leaveCount = 0;
+
+                teachers.forEach(t => {
+                    timeBlocks.forEach(b => {
+                        const recs = db[`${dayStr}_${t.id}_${b}`] || [];
+                        recs.forEach(r => {
+                            if (r.status === 'active') {
+                                if (r.type === 'class') classCount++;
+                                else if (r.type === 'leave') leaveCount++;
+                            }
+                        });
+                    });
+                });
+
+                const isToday = (dayStr === todayStr);
+                const isCurrentSelected = (dayStr === state.date);
+
+                let borderStyle = isToday 
+                    ? 'border-indigo-500 ring-2 ring-indigo-200 bg-white shadow-md' 
+                    : (isCurrentSelected ? 'border-indigo-300 bg-indigo-50/20' : 'border-slate-200/70 bg-white/70 hover:bg-white');
+
+                grid.innerHTML += `
+                    <div onclick="selectDateFromMonth('${dayStr}')" 
+                         class="min-h-[92px] p-2.5 rounded-2xl border ${borderStyle} hover:shadow-lg hover:border-indigo-400 transition-all cursor-pointer flex flex-col justify-between group">
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-black ${isToday ? 'text-indigo-600' : 'text-slate-700'}">${d}</span>
+                            ${isToday ? '<span class="text-[9px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded-md shadow-sm">今日</span>' : ''}
+                        </div>
+
+                        <!-- 狀態指標 (極簡膠囊) -->
+                        <div class="flex flex-wrap items-center gap-1.5 my-1">
+                            ${classCount > 0 ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-100/80 shadow-xs">${classCount} 課</span>` : ''}
+                            ${leaveCount > 0 ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-50 text-amber-700 border border-amber-100/80 shadow-xs">${leaveCount} 休</span>` : ''}
+                            ${(classCount === 0 && leaveCount === 0) ? '<span class="text-[10px] font-bold text-slate-300">無行程</span>' : ''}
+                        </div>
+
+                        <div class="text-[10px] text-right text-slate-300 group-hover:text-indigo-500 font-bold transition-colors">
+                            查看班表 ➜
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ================= 輔助選單與時間產生器 =================
         function generateTimeOptions() { let ops = ''; for(let h=8; h<=22; h++) { let hs = h.toString().padStart(2, '0'); ops += `<option value="${hs}:00">${hs}:00</option>`; if(h !== 22) ops += `<option value="${hs}:30">${hs}:30</option>`; } return ops; }
         const timeOps = generateTimeOptions(); document.getElementById('schStartTime').innerHTML = timeOps; document.getElementById('schEndTime').innerHTML = timeOps; document.getElementById('levStartTime').innerHTML = timeOps; document.getElementById('levEndTime').innerHTML = timeOps;
 
@@ -402,10 +602,8 @@
             return null;
         }
 
-        // ================= CSV 批次多檔與狀態同步匯入引擎 =================
-        function triggerCSVUpload() {
-            document.getElementById('csvFileInput').click();
-        }
+        // ================= CSV 批次匯入引擎 =================
+        function triggerCSVUpload() { document.getElementById('csvFileInput').click(); }
 
         function handleCSVUpload(event) {
             const files = event.target.files;
@@ -458,10 +656,7 @@
                                     if (!teacherName) continue;
 
                                     const teacher = teachers.find(t => t.name === teacherName);
-                                    if (!teacher) {
-                                        console.warn(`找不到老師，跳過此列：${teacherName}`);
-                                        continue; 
-                                    }
+                                    if (!teacher) continue; 
 
                                     for (let dInfo of dateCols) {
                                         let cellValue = row[dInfo.index];
@@ -471,7 +666,6 @@
                                         affectedKeys.add(`${dInfo.dateStr}_${teacher.id}_${block}`);
                                         
                                         let type = "class", reason = "", exact_time = "", descText = cellValue;
-
                                         if (cellValue === "休" || cellValue === "例" || cellValue.includes("請假")) {
                                             type = "leave"; 
                                             reason = "由 CSV 自動匯入標記";
@@ -507,11 +701,8 @@
                                             if (existingEvent.status === 'active') {
                                                 idsToCancel.push(existingEvent.id);
                                                 historyToCancel.push({
-                                                    event_id: existingEvent.id,
-                                                    action: '清除',
-                                                    timestamp: currentTime,
-                                                    user_name: currentUserApp,
-                                                    details: 'CSV 批次匯入狀態同步：自動清除重疊舊紀錄'
+                                                    event_id: existingEvent.id, action: '清除', timestamp: currentTime,
+                                                    user_name: currentUserApp, details: 'CSV 批次匯入狀態同步：自動清除重疊舊紀錄'
                                                 });
                                             }
                                         });
@@ -532,7 +723,7 @@
                                     await supabaseClient.from('event_history').insert(totalHistoryToInsert.slice(i, i + batchSize));
                                 }
 
-                                alert(`✅ 狀態同步完畢！成功清除舊紀錄，並匯入 ${totalEventsToInsert.length} 筆最新排班資料！`);
+                                alert(`✅ 狀態同步完畢！成功更新 ${totalEventsToInsert.length} 筆最新排班資料！`);
                                 await loadDataFromDB();
                             } else {
                                 alert("沒有解析到任何有效的排班資料，請確認格式或老師名稱是否正確。");
@@ -547,14 +738,13 @@
 
         // ================= 應用狀態與權限防護 =================
         const timeBlocks = ['上午', '下午', '晚上'];
-        let teachers = []; let db = {}; let state = { date: new Date().toISOString().split('T')[0], selectedTarget: { tId: null, block: null, currentType: null }, inputMode: 'class', editTarget: { key: null, eventId: null } };
-        
         document.getElementById('currentDate').value = state.date;
         updateDateDisplay();
 
         supabaseClient.auth.onAuthStateChange(async (event, session) => {
             if (session) {
-                const user = session.user; currentUserApp = user.user_metadata.full_name || user.email.split('@')[0];
+                const user = session.user; 
+                currentUserApp = user.user_metadata.full_name || user.email.split('@')[0];
                 currentUserId = user.id; 
                 
                 const { data: dbUser } = await supabaseClient.from('users').select('*').eq('id', user.id).maybeSingle();
@@ -567,34 +757,48 @@
                 } else { currentUserRole = dbUser.role; }
 
                 if (currentUserRole === 'pending' || currentUserRole === 'rejected') {
-                    document.getElementById('loginSection').classList.add('hidden'); document.getElementById('pendingSection').classList.remove('hidden');
+                    document.getElementById('loginSection').classList.add('hidden'); 
+                    document.getElementById('pendingSection').classList.remove('hidden');
                 } else {
-                    document.getElementById('authScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden');
+                    document.getElementById('authScreen').classList.add('hidden'); 
+                    document.getElementById('appScreen').classList.remove('hidden');
                     document.querySelectorAll('.script-user-name').forEach(el => el.innerText = dbUser ? dbUser.name : currentUserApp);
+                    
                     const roleBadge = document.getElementById('userRoleBadge');
-                    if(roleBadge) { roleBadge.innerText = currentUserRole === 'admin' ? '管理員' : '一般使用者'; roleBadge.className = currentUserRole === 'admin' ? "ml-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 font-bold rounded-md text-[10px]" : "ml-1 px-2 py-0.5 bg-slate-200 text-slate-600 font-bold rounded-md text-[10px]"; }
+                    if(roleBadge) { 
+                        roleBadge.innerText = currentUserRole === 'admin' ? '管理員' : '一般使用者'; 
+                        roleBadge.className = currentUserRole === 'admin' ? "ml-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 font-bold rounded-md text-[10px]" : "ml-1 px-2 py-0.5 bg-slate-200 text-slate-600 font-bold rounded-md text-[10px]"; 
+                    }
+                    
                     const adminPanel = document.getElementById('adminActionButtons');
-                    if (adminPanel) { if (currentUserRole === 'admin') { adminPanel.classList.remove('hidden'); adminPanel.classList.add('flex'); } else { adminPanel.classList.add('hidden'); adminPanel.classList.remove('flex'); } }
+                    if (adminPanel) { 
+                        if (currentUserRole === 'admin') { adminPanel.classList.remove('hidden'); adminPanel.classList.add('flex'); } 
+                        else { adminPanel.classList.add('hidden'); adminPanel.classList.remove('flex'); } 
+                    }
                     
                     await loadDataFromDB();
+                    // 預設切換為月曆模式
+                    switchView('month');
                 }
-            } else { document.getElementById('appScreen').classList.add('hidden'); document.getElementById('authScreen').classList.remove('hidden'); document.getElementById('loginSection').classList.remove('hidden'); document.getElementById('pendingSection').classList.add('hidden'); }
+            } else { 
+                document.getElementById('appScreen').classList.add('hidden'); 
+                document.getElementById('authScreen').classList.remove('hidden'); 
+                document.getElementById('loginSection').classList.remove('hidden'); 
+                document.getElementById('pendingSection').classList.add('hidden'); 
+            }
         });
 
         async function handleGoogleOAuth() { await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } }); }
         async function handleSystemLogout() { await supabaseClient.auth.signOut(); }
 
-        // ================= 資料庫讀取引擎 (兼職 part_time 隔離邏輯) =================
+        // ================= 資料庫讀取引擎 =================
         async function loadDataFromDB() {
             document.getElementById('loadingOverlay').classList.remove('hidden');
             const { data: tData } = await supabaseClient.from('teachers').select('*'); 
             let rawTeachers = tData || [];
-            
             rawTeachers.sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, {numeric: true}));
             
             const myProfile = rawTeachers.find(t => t.id === currentUserId);
-            
-            // 兼職 (part_time) 與外聘 (external) 啟動隔離結界，只看見自己
             isPersonalView = (myProfile && (myProfile.type === 'part_time' || myProfile.type === 'external'));
             
             if (isPersonalView) {
@@ -632,27 +836,27 @@
                     db[key].push(e);
                 });
             }
-            document.getElementById('loadingOverlay').classList.add('hidden'); renderGrid();
+            
+            document.getElementById('loadingOverlay').classList.add('hidden'); 
+            
+            if (currentActiveView === 'month') {
+                renderMonthView();
+            } else {
+                renderGrid();
+            }
         }
 
-        // ================= 員工權限審核（修復版：移除 created_at 排序） =================
-        function closeUserApprovalModal() {
-            document.getElementById('modalUserApproval').style.display = 'none';
-        }
-
+        // ================= 審核面板 =================
+        function closeUserApprovalModal() { document.getElementById('modalUserApproval').style.display = 'none'; }
         async function openUserApprovalModal() {
             const modal = document.getElementById('modalUserApproval');
             modal.style.display = 'flex';
-
             const tbody = document.getElementById('approvalTableBody'); 
             tbody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-400 font-bold">載入使用者名單中...</td></tr>';
 
-            // 修正：直接抓取 users，移除不存在的 created_at
             const { data: allUsers, error } = await supabaseClient.from('users').select('*');
-            
             if (error || !allUsers) {
-                console.error("Supabase 讀取錯誤：", error);
-                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-rose-500 font-bold">讀取失敗：${error ? error.message : '未知錯誤'}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-rose-500 font-bold">讀取失敗</td></tr>`;
                 return;
             }
 
@@ -694,21 +898,15 @@
 
         async function changeUserRole(userId, newRole, userName) {
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            
-            // 1. 更新 users 資料表身分
             await supabaseClient.from('users').update({ role: newRole }).eq('id', userId);
             
-            // 2. 對接 teachers 資料表，確保兼職/內部對應相應的排課模式
             if (newRole === 'user' || newRole === 'admin' || newRole === 'part_time') {
                 const { data: existTeacher } = await supabaseClient.from('teachers').select('*').eq('id', userId).maybeSingle();
-                
                 const teacherType = (newRole === 'part_time') ? 'part_time' : 'fulltime';
 
                 if (!existTeacher) {
                     await supabaseClient.from('teachers').insert({
-                        id: userId,
-                        name: userName || '未命名',
-                        type: teacherType,
+                        id: userId, name: userName || '未命名', type: teacherType,
                         start_date: new Date().toISOString().split('T')[0],
                         hourly_rate: (newRole === 'part_time' ? 200 : 0)
                     });
@@ -716,16 +914,12 @@
                     await supabaseClient.from('teachers').update({ type: teacherType }).eq('id', userId);
                 }
             }
-            
-            if (userId === currentUserId) {
-                currentUserRole = newRole;
-            }
-
+            if (userId === currentUserId) currentUserRole = newRole;
             await loadDataFromDB();
             openUserApprovalModal();
         }
 
-        // ================= 網格渲染 =================
+        // ================= 單日網格渲染 =================
         function renderGrid() {
             const headerRow = document.getElementById('headerRow');
             headerRow.innerHTML = '<th class="p-5 w-[110px] text-slate-400 font-black text-center sticky left-0 bg-slate-50/80 backdrop-blur-md z-20 border-r border-slate-200/60 shadow-[1px_0_0_rgba(226,232,240,0.6)] uppercase tracking-widest text-sm">時段區塊</th>';
@@ -1045,7 +1239,6 @@
             targetTeachers.forEach(t => {
                 try {
                     const annualLeaveTotal = calcLsaAnnualLeave(t.startDate); 
-                    
                     let periodStr = '不適用';
                     let maxRest = '-';
                     let periodInfo = null;
@@ -1059,7 +1252,6 @@
                     }
                     
                     const stats = getLeaveStats(t.id, periodInfo ? periodInfo.start : null, periodInfo ? periodInfo.end : null);
-                    
                     let seniorityStr = t.type === 'responsible' ? '不適用' : "未滿半年"; 
                     if(t.startDate && t.type !== 'responsible') { 
                         const s = new Date(t.startDate), n = getTaiwanDateObj(); 
@@ -1091,7 +1283,7 @@
                         </tr>`;
                 } catch (error) {
                     console.error(`計算 ${t.name} 結算資料時發生錯誤:`, error);
-                    tbody.innerHTML += `<tr><td colspan="6" class="p-4 text-center text-red-500 font-bold bg-red-50">⚠️ 系統無法計算 [${t.name}] 的休假狀態 (可能尚未填寫到職日)</td></tr>`;
+                    tbody.innerHTML += `<tr><td colspan="6" class="p-4 text-center text-red-500 font-bold bg-red-50">⚠️ 系統無法計算 [${t.name}] 的休假狀態</td></tr>`;
                 }
             });
         }
